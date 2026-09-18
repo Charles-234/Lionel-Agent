@@ -59,6 +59,44 @@ class TestLionelOrchestrator(unittest.TestCase):
                 "Do something",
             )
 
+    def test_execute_simulation_uses_governed_executor(self):
+        result = self.orchestrator.execute(
+            task_type="reconnaissance",
+            objective="Enumerate subdomains for an authorized domain",
+            role_id="offensive_security",
+            arguments={"domain": "example.com"},
+            execution_mode="simulation",
+        )
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.execution_mode, "simulation")
+        self.assertFalse(result.verified)
+        self.assertIsNotNone(result.data)
+
+    def test_execute_denies_unauthorized_role(self):
+        result = self.orchestrator.execute(
+            task_type="reconnaissance",
+            objective="Enumerate subdomains",
+            role_id="frontend_developer",
+            arguments={"domain": "example.com"},
+            execution_mode="simulation",
+        )
+
+        self.assertFalse(result.success)
+        self.assertEqual(result.status, "CAPABILITY_DENIED")
+
+    def test_execute_preserves_existing_governance_for_wrong_capability(self):
+        result = self.orchestrator.execute(
+            task_type="financial_analysis",
+            objective="Analyze financial information",
+            role_id="financial_analyst",
+            arguments={"domain": "example.com"},
+            execution_mode="simulation",
+        )
+
+        self.assertFalse(result.success)
+
 
 if __name__ == "__main__":
     unittest.main()
+

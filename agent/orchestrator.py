@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 
 from agent.request_planner import RequestPlanner
 from tools.registry import get_registry
+from tools.executor import execute as execute_tool
 from tools_registry.resolver import resolve_tools
 
 
@@ -151,6 +152,59 @@ class LionelOrchestrator:
             tool_id=executable[0],
         )
 
+    def execute(
+        self,
+        *,
+        task_type: str,
+        objective: str,
+        role_id: str,
+        arguments: Optional[dict] = None,
+        scope: Any = None,
+        execution_mode: str = "simulation",
+        confirmed: bool = False,
+        session_id: Optional[str] = None,
+    ):
+        """Execute a prepared request through the existing governed executor.
+
+        This is an additive orchestration API. It preserves the existing
+        planning, discovery, and preparation APIs and delegates actual
+        execution to tools.executor.execute(), which owns the existing
+        registry, policy, and audit path.
+
+        No policy or audit logic is duplicated here.
+        """
+        prepared = self.prepare_execution(
+            task_type=task_type,
+            objective=objective,
+            role_id=role_id,
+        )
+
+        if not prepared.success:
+            return prepared
+
+        if not prepared.tool_id or not prepared.capability_id:
+            return OrchestrationResult(
+                success=False,
+                status="EXECUTION_NOT_READY",
+                message="Execution could not proceed because tool selection was incomplete.",
+                task_type=task_type,
+                capability_id=prepared.capability_id,
+                tool_id=prepared.tool_id,
+                execution_mode=execution_mode,
+            )
+
+        result = execute_tool(
+            prepared.tool_id,
+            arguments or {},
+            capability_id=prepared.capability_id,
+            scope=scope,
+            execution_mode=execution_mode,
+            confirmed=confirmed,
+            session_id=session_id,
+            role=role_id,
+        )
+
+        return result
     def _is_executable(self, tool_id: str) -> bool:
         """Check executable registry membership without executing."""
         try:
@@ -158,3 +212,6 @@ class LionelOrchestrator:
             return True
         except KeyError:
             return False
+
+
+
