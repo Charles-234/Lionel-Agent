@@ -21,6 +21,11 @@ class Httpx(Tool):
     description = "Probe HTTP services on a list of hosts using httpx"
     category = "recon"
     requires_binary = "httpx"
+    risk_level = "medium"
+    requires_authorized_target = True
+    network_access = True
+    supports_simulation = True
+    provenance = "builtin"
 
     def __init__(self):
         self._mock = MockHttpx()
@@ -44,8 +49,7 @@ class Httpx(Tool):
                               tool_name=self.name)
 
         if not self.available():
-            logger.info(f"httpx not installed - using mock for {len(hosts)} hosts")
-            return self._mock.run(hosts=hosts)
+            return ToolResult(success=False, error="Required tool binary is unavailable.", tool_name=self.name, execution_mode="real", verified=False)
 
         start = time.time()
         cmd = [self.requires_binary, "-json", "-silent", "-no-color"]

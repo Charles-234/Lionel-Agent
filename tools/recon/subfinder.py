@@ -21,6 +21,11 @@ class Subfinder(Tool):
     description = "Passively enumerate subdomains for a domain using subfinder"
     category = "recon"
     requires_binary = "subfinder"
+    risk_level = "medium"
+    requires_authorized_target = True
+    network_access = True
+    supports_simulation = True
+    provenance = "builtin"
 
     def __init__(self):
         self._mock = MockSubfinder()
@@ -41,8 +46,7 @@ class Subfinder(Tool):
 
     def run(self, domain: str, silent: bool = True, timeout_sec: int = 120, **kwargs: Any) -> ToolResult:
         if not self.available():
-            logger.info(f"subfinder not installed - using mock for {domain}")
-            return self._mock.run(domain=domain, **kwargs)
+            return ToolResult(success=False, error="Required tool binary is unavailable.", tool_name=self.name, execution_mode="real", verified=False)
 
         start = time.time()
         cmd = [self.requires_binary, "-d", domain, "-silent"]

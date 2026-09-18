@@ -21,6 +21,12 @@ class Nuclei(Tool):
     description = "Template-based vulnerability scan using nuclei"
     category = "recon"
     requires_binary = "nuclei"
+    risk_level = "high"
+    requires_authorized_target = True
+    network_access = True
+    supports_simulation = True
+    confirmation_required = True
+    provenance = "builtin"
 
     def __init__(self):
         self._mock = MockNuclei()
@@ -46,8 +52,7 @@ class Nuclei(Tool):
                               tool_name=self.name)
 
         if not self.available():
-            logger.info(f"nuclei not installed - using mock for {len(targets)} targets")
-            return self._mock.run(targets=targets, severity=severity)
+            return ToolResult(success=False, error="Required tool binary is unavailable.", tool_name=self.name, execution_mode="real", verified=False)
 
         start = time.time()
         cmd = [
