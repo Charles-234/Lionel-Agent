@@ -1,0 +1,37 @@
+# Secrets - NEVER commit these
+.env
+*.key
+*.pem
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archives
+*.zip
+*.tar.gz
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Allow the template (has no secrets)
+!.env.example

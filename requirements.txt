@@ -1,0 +1,4 @@
+requests==2.34.2
+python-dotenv==1.2.3
+Add-Content "D:\phantom-agent\requirements.txt" "rank-bm25==0.2.2"
+Add-Content "D:\phantom-agent\requirements.txt" "sentence-transformers==2.7.0"
