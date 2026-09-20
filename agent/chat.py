@@ -51,6 +51,8 @@ def chat(
     user_id: int,
     user_message: str,
     include_skills: bool = True,
+    image_bytes: Optional[bytes] = None,
+    image_mime_type: str = "image/jpeg",
 ) -> ChatResponse:
     """
     Process one chat turn.
@@ -60,16 +62,18 @@ def chat(
     2. Retrieve relevant skills (if include_skills)
     3. Build system prompt
     4. Build message list with history
-    5. Call router
+    5. Call router (switches to 'vision' if image_bytes provided)
     6. Record token usage
     7. Store exchange in history
     """
     user_message = (user_message or "").strip()
-    if not user_message:
+    if not user_message and not image_bytes:
         return ChatResponse(
             text="(empty message)", model="", provider="",
             tokens_used=0, skills_used=[], error="empty",
         )
+    if not user_message and image_bytes:
+        user_message = "Please analyze this image and explain what you see."
 
     # 1. Budget check
     estimated = 500 + len(user_message) // 4  # rough prompt estimate
@@ -114,12 +118,20 @@ def chat(
         if turn.role in ("user", "assistant"):
             messages.append(Message(role=turn.role, content=turn.content))
 
-    messages.append(Message(role="user", content=user_message))
+    messages.append(
+        Message(
+            role="user",
+            content=user_message,
+            image_data=image_bytes,
+            image_mime_type=image_mime_type,
+        )
+    )
 
     # 5. Call router
+    task_type = "vision" if image_bytes else "chat"
     try:
         completion = router.call_with_failover(
-            task_type="chat",
+            task_type=task_type,
             messages=messages,
             max_tokens=config.MAX_OUTPUT_TOKENS_DEFAULT,
             temperature=0.7,
@@ -127,7 +139,7 @@ def chat(
     except ProviderError as e:
         # Keep diagnostic details in server logs only.
         # Never expose provider/internal error details to the user.
-        logger.error("Chat router failed: %s", e.message, exc_info=True)
+        logger.error("Chat router failed (%s): %s", task_type, e.message, exc_info=True)
 
         return ChatResponse(
             text="I'm temporarily unable to process your request. Please try again shortly.",
@@ -142,7 +154,8 @@ def chat(
     token_budget.record(user_id, completion.total_tokens)
 
     # 7. Store history
-    h.add("user", user_message)
+    hist_entry = f"[Image attached] {user_message}" if image_bytes else user_message
+    h.add("user", hist_entry)
     h.add("assistant", completion.text)
 
     return ChatResponse(

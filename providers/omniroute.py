@@ -2,6 +2,7 @@
 Lionel Agent - OmniRoute HTTP client.
 Single client that talks to OmniRoute's OpenAI-compatible API.
 """
+import base64
 import json
 import time
 import logging
@@ -42,9 +43,24 @@ def call(
         "Authorization": f"Bearer {config.OMNIROUTE_API_KEY}",
         "Content-Type": "application/json",
     }
+    messages_payload = []
+    for m in messages:
+        if getattr(m, "image_data", None):
+            b64 = base64.b64encode(m.image_data).decode("utf-8")
+            mime = getattr(m, "image_mime_type", "image/jpeg") or "image/jpeg"
+            messages_payload.append({
+                "role": m.role,
+                "content": [
+                    {"type": "text", "text": m.content},
+                    {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
+                ],
+            })
+        else:
+            messages_payload.append({"role": m.role, "content": m.content})
+
     payload = {
         "model": model,
-        "messages": [{"role": m.role, "content": m.content} for m in messages],
+        "messages": messages_payload,
         "max_tokens": max_tokens,
         "temperature": temperature,
     }

@@ -8,6 +8,7 @@ Security rules:
 - Credentials are never logged.
 """
 
+import base64
 import logging
 import time
 from typing import List, Optional
@@ -327,15 +328,21 @@ def call_gemini(
 
         else:
             role = "user" if message.role == "user" else "model"
+            parts = [{"text": message.content}]
+            if getattr(message, "image_data", None):
+                b64 = base64.b64encode(message.image_data).decode("utf-8")
+                mime = getattr(message, "image_mime_type", "image/jpeg") or "image/jpeg"
+                parts.append({
+                    "inlineData": {
+                        "mimeType": mime,
+                        "data": b64,
+                    }
+                })
 
             contents.append(
                 {
                     "role": role,
-                    "parts": [
-                        {
-                            "text": message.content,
-                        }
-                    ],
+                    "parts": parts,
                 }
             )
 

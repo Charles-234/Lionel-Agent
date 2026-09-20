@@ -59,6 +59,8 @@ class IncomingMessage:
 
     user_id: int
     text: str
+    image_bytes: Optional[bytes] = None
+    image_mime_type: str = "image/jpeg"
 
 
 @dataclass(frozen=True)
@@ -100,7 +102,8 @@ def screen_message(message: Any) -> DoorDecision:
     if user_id != owner_id():
         return DoorDecision(allowed=False, reason=STRANGER_REFUSED_MESSAGE)
     text = getattr(message, "text", "")
-    if not isinstance(text, str) or not text.strip():
+    has_image = bool(getattr(message, "image_bytes", None))
+    if not isinstance(text, str) or (not text.strip() and not has_image):
         return DoorDecision(allowed=False, reason=EMPTY_MESSAGE)
     return DoorDecision(allowed=True, reason="Owner message may enter.")
 
@@ -142,7 +145,7 @@ def _dispatch_message(door: TelegramDoor, message: IncomingMessage) -> OutgoingR
 
     text = getattr(message, "text", "")
     stripped = text.strip() if isinstance(text, str) else ""
-    if stripped.startswith("/"):
+    if stripped.startswith("/") and not getattr(message, "image_bytes", None):
         return _run_builtin_command(door, message.user_id, stripped)
 
     decision = screen_message(message)
@@ -154,12 +157,20 @@ def _dispatch_message(door: TelegramDoor, message: IncomingMessage) -> OutgoingR
         if admitted is None or not admitted.allowed:
             door.note_stranger(message.user_id)
             return OutgoingReply(text=STRANGER_REFUSED_MESSAGE)
-        if not stripped:
+        if not stripped and not getattr(message, "image_bytes", None):
             return OutgoingReply(text=EMPTY_MESSAGE)
     if door.core_handler is None:
         return OutgoingReply(text="Core is not connected yet.")
+    img_bytes = getattr(message, "image_bytes", None)
+    img_mime = getattr(message, "image_mime_type", "image/jpeg")
     try:
-        reply = door.core_handler(message.text)
+        if img_bytes is not None:
+            try:
+                reply = door.core_handler(message.text, img_bytes, img_mime)
+            except TypeError:
+                reply = door.core_handler(message.text)
+        else:
+            reply = door.core_handler(message.text)
     except Exception:
         return OutgoingReply(text="I could not handle that. Try again.")
     return OutgoingReply(text=sanitize_for_display(reply))
@@ -260,10 +271,25 @@ class TelegramDoor:
             if message is None:
                 return
             user_id = getattr(message.from_user, "id", None)
-            text = getattr(message, "text", "") or ""
+            text = (getattr(message, "text", "") or getattr(message, "caption", "") or "").strip()
+
+            image_bytes = None
+            image_mime_type = "image/jpeg"
+            if getattr(message, "photo", None):
+                try:
+                    photo = message.photo[-1]
+                    file = await photo.get_file()
+                    image_bytes = bytes(await file.download_as_bytearray())
+                    if not text:
+                        text = "Please analyze this image and explain what you see."
+                except Exception:
+                    logger.warning("Failed to download Telegram photo from user %s", user_id, exc_info=True)
+
             incoming = IncomingMessage(
                 user_id=user_id if isinstance(user_id, int) else 0,
                 text=text,
+                image_bytes=image_bytes,
+                image_mime_type=image_mime_type,
             )
             reply = door.handle(incoming)
             outgoing = reply.text
@@ -276,9 +302,8 @@ class TelegramDoor:
 
         try:
             application = ApplicationBuilder().token(bot_token).build()
-            # One text handler carries both plain words and /commands, so every
-            # door command reaches the door instead of being dropped.
-            application.add_handler(MessageHandler(filters.TEXT, _handler))
+            # Text and photo handlers carry both plain words, images, and /commands
+            application.add_handler(MessageHandler(filters.TEXT | filters.PHOTO, _handler))
             application.add_handler(CommandHandler("start", _handler))
         except Exception:
             logger.exception("Telegram door failed while building the application.")
@@ -299,6 +324,8 @@ def run_chat_through_door(
     text: str,
     *,
     include_skills: bool = True,
+    image_bytes: Optional[bytes] = None,
+    image_mime_type: str = "image/jpeg",
 ) -> OutgoingReply:
     """
     Run one chat turn through Lionel's chat mode, then return a safe reply.
@@ -310,7 +337,13 @@ def run_chat_through_door(
     from agent.safety import sanitize_for_display
     from agent.chat import chat
 
-    reply = chat(user_id=user_id, user_message=text, include_skills=include_skills)
+    reply = chat(
+        user_id=user_id,
+        user_message=text,
+        include_skills=include_skills,
+        image_bytes=image_bytes,
+        image_mime_type=image_mime_type,
+    )
     return OutgoingReply(text=sanitize_for_display(reply.text))
 
 
@@ -322,8 +355,13 @@ def set_door_to_chat_mode(
     """
     Plug the chat brain into the door so it can answer owned messages.
     """
-    door.core_handler = lambda text: run_chat_through_door(
-        door, user_id=owner_id(), text=text, include_skills=skill_mode
+    door.core_handler = lambda text, img=None, mime="image/jpeg": run_chat_through_door(
+        door,
+        user_id=owner_id(),
+        text=text,
+        include_skills=skill_mode,
+        image_bytes=img,
+        image_mime_type=mime,
     ).text
 
 

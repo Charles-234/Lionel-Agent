@@ -9,6 +9,8 @@ from typing import Optional
 class Message:
     role: str
     content: str
+    image_data: Optional[bytes] = None
+    image_mime_type: str = "image/jpeg"
 
 
 @dataclass
