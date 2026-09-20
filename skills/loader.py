@@ -84,8 +84,17 @@ def load_prebuilt_index(source_name: str, source_cfg: Dict[str, Any]) -> List[Di
         else:
             # Join with repo root
             joined = (repo_root / rel_path).resolve()
-            # If the path is a directory, look for SKILL.md inside
-            if joined.is_dir():
+            # Keep the joined path inside the repo folder.  A path that points
+            # outside (for example "../../secret") is dropped to an empty
+            # value so it can never be used to reach other files.
+            try:
+                inside = joined.is_relative_to(repo_root)
+            except ValueError:
+                inside = False
+            if not inside:
+                logger.warning(f"{source_name}: ignoring path outside repo: {rel_path!r}")
+                abs_path = ""
+            elif joined.is_dir():
                 candidate = joined / "SKILL.md"
                 abs_path = str(candidate)
             elif joined.suffix == "" and not joined.exists():
@@ -112,6 +121,17 @@ def load_by_scan(source_name: str, source_cfg: Dict[str, Any]) -> List[Dict[str,
     root = Path(source_cfg["root"])
     filename = source_cfg.get("filename", "SKILL.md")
 
+    # Keep scan roots inside the project folder.  An outside root would let
+    # the scan read files it should never touch, so refuse it loudly.
+    try:
+        _root_resolved = root.resolve()
+        _project_root = Path(__file__).resolve().parent.parent
+        _inside = _root_resolved.is_relative_to(_project_root)
+    except ValueError:
+        _inside = False
+    if not _inside:
+        logger.warning(f"{source_name}: ignoring scan root outside project: {str(root)!r}")
+        return []
     if not root.exists():
         logger.warning(f"{source_name}: root not found at {root}")
         return []

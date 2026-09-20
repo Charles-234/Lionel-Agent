@@ -14,9 +14,9 @@ log = logging.getLogger("test")
 
 
 def main():
-    print(f"Lionel - OmniRoute connectivity test")
+    print("Lionel - OmniRoute connectivity test")
     print(f"URL: {config.OMNIROUTE_URL}")
-    print(f"Key: {config.OMNIROUTE_API_KEY[:8]}...{config.OMNIROUTE_API_KEY[-4:]}")
+    print("Credential: configured (value hidden)")
     print()
 
     # Test 1 - ping Cerebras (chat primary)
@@ -25,7 +25,7 @@ def main():
     if reply:
         print(f"  OK - replied: {reply!r}")
     else:
-        print(f"  FAILED")
+        print("  FAILED")
     print()
 
     # Test 2 - a real message with token counts
@@ -42,11 +42,14 @@ def main():
         )
         print(f"  Text: {completion.text}")
         print(f"  Model used: {completion.model}")
-        print(f"  Tokens - prompt: {completion.prompt_tokens}, "
-              f"completion: {completion.completion_tokens}, "
-              f"total: {completion.total_tokens}")
+        print(
+            f"  Tokens - prompt: {completion.prompt_tokens}, "
+            f"completion: {completion.completion_tokens}, "
+            f"total: {completion.total_tokens}"
+        )
     except ProviderError as e:
-        print(f"  FAILED: [{e.status_code}] {e.message}")
+        print("  FAILED: OmniRoute request could not be completed.")
+        print(f"  Status code: {e.status_code}")
         print(f"  Retryable: {e.retryable}, Permanent: {e.permanent}")
         sys.exit(1)
     print()
@@ -57,7 +60,7 @@ def main():
     if reply:
         print(f"  OK - replied: {reply!r}")
     else:
-        print(f"  FAILED")
+        print("  FAILED")
     print()
 
     # Test 4 - fallback 2 (SambaNova)
@@ -66,7 +69,7 @@ def main():
     if reply:
         print(f"  OK - replied: {reply!r}")
     else:
-        print(f"  FAILED")
+        print("  FAILED")
     print()
 
     print("Done.")

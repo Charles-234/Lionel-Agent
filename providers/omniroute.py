@@ -33,6 +33,9 @@ def call(
 
     Returns a Completion on success.
     Raises ProviderError on failure.
+
+    Provider-specific error details are logged server-side and are
+    never included in the public ProviderError message.
     """
     url = f"{config.OMNIROUTE_URL}/v1/chat/completions"
     headers = {
@@ -55,17 +58,23 @@ def call(
         except requests.exceptions.RequestException as e:
             last_exception = e
             logger.warning(
-                f"OmniRoute network error (attempt {attempt + 1}/{MAX_NETWORK_RETRIES + 1}): {e}"
+                "OmniRoute network error "
+                "(attempt %s/%s): %s",
+                attempt + 1,
+                MAX_NETWORK_RETRIES + 1,
+                e,
             )
+
             if attempt < MAX_NETWORK_RETRIES:
                 time.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
                 continue
-            # Exhausted retries
+
+            # Exhausted retries.
             raise ProviderError(
                 provider="omniroute",
                 model=model,
                 status_code=None,
-                message=f"Network error: {e}",
+                message="OmniRoute network request failed.",
                 retryable=True,
             )
 
@@ -73,8 +82,15 @@ def call(
         if resp.status_code == 200:
             return _parse_success(resp.json(), model)
 
-        # Non-200 status - classify the error
+        # Extract provider details for server-side diagnostics only.
         error_msg = _extract_error_message(resp)
+
+        logger.warning(
+            "OmniRoute HTTP error: model=%s status=%s detail=%s",
+            model,
+            resp.status_code,
+            error_msg,
+        )
 
         if resp.status_code == 404:
             # Model deprecated / not found - permanent
@@ -82,7 +98,7 @@ def call(
                 provider="omniroute",
                 model=model,
                 status_code=404,
-                message=f"Model not found: {error_msg}",
+                message="Requested model is unavailable.",
                 retryable=False,
                 permanent=True,
             )
@@ -93,7 +109,7 @@ def call(
                 provider="omniroute",
                 model=model,
                 status_code=resp.status_code,
-                message=f"Temporary failure ({resp.status_code}): {error_msg}",
+                message="OmniRoute is temporarily unavailable.",
                 retryable=True,
             )
 
@@ -103,7 +119,7 @@ def call(
                 provider="omniroute",
                 model=model,
                 status_code=resp.status_code,
-                message=f"Auth error ({resp.status_code}): {error_msg}",
+                message="OmniRoute authentication or authorization failed.",
                 retryable=False,
             )
 
@@ -112,7 +128,7 @@ def call(
             provider="omniroute",
             model=model,
             status_code=resp.status_code,
-            message=f"HTTP {resp.status_code}: {error_msg}",
+            message="OmniRoute returned an unexpected HTTP error.",
             retryable=False,
         )
 
@@ -145,7 +161,12 @@ def _parse_success(data: dict, model: str) -> Completion:
 
 
 def _extract_error_message(resp) -> str:
-    """Pull a useful error string out of a failed HTTP response."""
+    """
+    Pull a useful diagnostic string out of a failed HTTP response.
+
+    This function is intended for server-side logging only.
+    Its output must never be treated as user-facing text.
+    """
     try:
         body = resp.json()
     except (ValueError, json.JSONDecodeError):
@@ -158,6 +179,7 @@ def _extract_error_message(resp) -> str:
             return str(err.get("message", err))[:200]
         if err:
             return str(err)[:200]
+
         # Some providers: {"message": "..."}
         if "message" in body:
             return str(body["message"])[:200]
@@ -180,8 +202,19 @@ def ping(model: str) -> Optional[str]:
         )
         return completion.text.strip()
     except ProviderError as e:
-        logger.debug(f"Ping failed for {model}: {e.message}")
+        logger.debug(
+            "Ping failed for model=%s status=%s retryable=%s permanent=%s",
+            model,
+            e.status_code,
+            e.retryable,
+            e.permanent,
+        )
         return None
     except Exception as e:
-        logger.debug(f"Ping unexpected error for {model}: {e}")
+        logger.debug(
+            "Ping unexpected error for model=%s: %s",
+            model,
+            e,
+            exc_info=True,
+        )
         return None

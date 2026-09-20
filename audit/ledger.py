@@ -21,13 +21,35 @@ _SECRET_PATTERNS = [
     re.compile(r"(?i)\bsk-[A-Za-z0-9_-]{8,}"),
 ]
 
+_SENSITIVE_KEYS = frozenset({
+    "api_key", "apikey", "token", "secret", "password", "authorization",
+    "auth", "bearer", "access_token", "refresh_token", "client_secret",
+    "api_secret", "private_key", "session_token",
+})
+
+
+def _redact_key(key: str) -> bool:
+    lowered = re.sub(r"[^a-z0-9]", "", key.lower())
+    return lowered in {
+        "apikey", "token", "secret", "password", "authorization",
+        "auth", "bearer", "accesstoken", "refreshtoken", "clientsecret",
+        "apisecret", "privatekey", "sessiontoken",
+    }
+
 
 def sanitize(value: Any) -> Any:
     """Remove likely credential material; never store full model reasoning."""
     if value is None or isinstance(value, (bool, int, float)):
         return value
     if isinstance(value, dict):
-        return {str(k): sanitize(v) for k, v in value.items()}
+        cleaned: Dict[str, Any] = {}
+        for raw_key, item in value.items():
+            key = str(raw_key)
+            if _redact_key(key):
+                cleaned[key] = "[REDACTED]"
+            else:
+                cleaned[key] = sanitize(item)
+        return cleaned
     if isinstance(value, list):
         return [sanitize(v) for v in value[:20]]
     text = str(value)

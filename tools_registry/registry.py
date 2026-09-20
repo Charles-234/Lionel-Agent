@@ -67,6 +67,21 @@ register_tool(ToolSpec(
     binary="nmap",
 ))
 
+# Governed public-research fetcher (reads text only, never executes content).
+register_tool(ToolSpec(
+    id="web_fetch",
+    name="Web Fetcher",
+    category="research",
+    description="Fetch and clean public web page text for research workflows.",
+    capabilities=["research"],
+    risk_level="medium",
+    network_access=True,
+    requires_authorized_target=False,
+    supports_simulation=True,
+    execution_modes=["real", "simulation"],
+    provenance="builtin",
+))
+
 # Explicit capability placeholders: visible to the architecture, but not executable.
 for tool_id, name, category, capability in (
     ("amass", "Amass", "reconnaissance", "reconnaissance"),

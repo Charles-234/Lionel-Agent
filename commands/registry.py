@@ -159,6 +159,7 @@ def parse_and_dispatch(text: str) -> Optional[CommandResult]:
         return CommandResult(f"Unknown command: /{cmd}. Type /help.", is_error=True)
     try:
         return handler(args)
-    except Exception as e:
-        logger.exception(f"Command '/{cmd}' failed")
-        return CommandResult(f"Command error: {e}", is_error=True)
+    except Exception:
+        # Full diagnostics go to server logs only; the reply stays generic.
+        logger.exception("Command '/%s' failed", cmd)
+        return CommandResult("That command could not be completed. Try /help.", is_error=True)

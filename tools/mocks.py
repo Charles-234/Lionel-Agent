@@ -41,6 +41,8 @@ class MockSubfinder(Tool):
     description = "Passively enumerate subdomains for a domain (MOCK)"
     category = "recon"
     requires_binary = None
+    supports_simulation = True
+    provenance = "simulation"
 
     def schema(self) -> Dict[str, Any]:
         return {
@@ -65,6 +67,9 @@ class MockSubfinder(Tool):
             raw="\n".join(subdomains),
             duration_ms=duration,
             tool_name=self.name,
+            execution_mode="simulation",
+            verified=False,
+            evidence=[{"source": "mock", "verified": False}],
         )
 
 
@@ -73,6 +78,8 @@ class MockHttpx(Tool):
     description = "Probe HTTP services on a list of hosts (MOCK)"
     category = "recon"
     requires_binary = None
+    supports_simulation = True
+    provenance = "simulation"
 
     def schema(self) -> Dict[str, Any]:
         return {
@@ -105,6 +112,9 @@ class MockHttpx(Tool):
             raw=f"{len(live)} live hosts",
             duration_ms=duration,
             tool_name=self.name,
+            execution_mode="simulation",
+            verified=False,
+            evidence=[{"source": "mock", "verified": False}],
         )
 
 
@@ -113,6 +123,8 @@ class MockNuclei(Tool):
     description = "Template-based vulnerability scan (MOCK)"
     category = "recon"
     requires_binary = None
+    supports_simulation = True
+    provenance = "simulation"
 
     def schema(self) -> Dict[str, Any]:
         return {
@@ -146,6 +158,44 @@ class MockNuclei(Tool):
             raw=f"{len(findings)} findings",
             duration_ms=duration,
             tool_name=self.name,
+            execution_mode="simulation",
+            verified=False,
+            evidence=[{"source": "mock", "verified": False}],
+        )
+
+
+class MockWebFetch(Tool):
+    name = "web_fetch"
+    description = "Fetch public web page text safely for research (MOCK)"
+    category = "research"
+    requires_binary = None
+    supports_simulation = True
+    provenance = "simulation"
+
+    def schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {"url": {"type": "string", "description": "Public http(s) URL"}},
+            "required": ["url"],
+        }
+
+    def run(self, url: str, **kwargs: Any) -> ToolResult:
+        start = time.time()
+        host = (url or "").strip() or "example.com"
+        text = (
+            f"Simulated research content for {host}. "
+            "This mock exists so governed research chains can be exercised "
+            "without live network access."
+        )
+        duration = int((time.time() - start) * 1000)
+        return ToolResult(
+            success=True,
+            data={"url": url, "text": text, "chars": len(text)},
+            duration_ms=duration,
+            tool_name=self.name,
+            execution_mode="simulation",
+            verified=False,
+            evidence=[{"source": "mock", "verified": False}],
         )
 
 
@@ -154,4 +204,5 @@ MOCK_TOOLS = {
     "subfinder": MockSubfinder,
     "httpx": MockHttpx,
     "nuclei": MockNuclei,
+    "web_fetch": MockWebFetch,
 }

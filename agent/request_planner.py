@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Sequence
 
 from agent.planner import Plan, PlanStep, Planner
 
@@ -71,4 +71,44 @@ class RequestPlanner:
             task_type=normalized,
             objective=objective,
             steps=[step],
+        )
+
+    def create_multi_step_plan(
+        self,
+        task_type: str,
+        objective: str,
+        descriptions: Sequence[str],
+        requires_tool: bool = False,
+    ) -> Plan:
+        """Build a deterministic plan from explicitly supplied step descriptions.
+
+        This is a controlled decomposition boundary: a future reasoning layer
+        may propose the descriptions, while this adapter only validates and
+        records them against the known task-type mapping.  It does not select
+        a role, authorize a capability, select a tool, or execute work.
+        """
+        normalized = task_type.strip().lower()
+
+        if normalized not in TASK_CAPABILITIES:
+            raise ValueError(f"Unknown task type: {task_type}")
+        if isinstance(descriptions, (str, bytes)) or not descriptions:
+            raise ValueError("at least one plan step description is required")
+        if any(not isinstance(description, str) or not description.strip()
+               for description in descriptions):
+            raise ValueError("plan step descriptions must be non-empty strings")
+
+        capability = TASK_CAPABILITIES[normalized]
+        steps = [
+            PlanStep(
+                description=description,
+                capability=capability,
+                requires_tool=requires_tool,
+            )
+            for description in descriptions
+        ]
+
+        return self.planner.plan(
+            task_type=normalized,
+            objective=objective,
+            steps=steps,
         )

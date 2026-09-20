@@ -92,9 +92,25 @@ class LionelOrchestrator:
                 task_type=task_type,
             )
 
-        step = plan.steps[0]
-        capability_id = step.capability
+        return self.select_tool_for_capability(
+            capability_id=plan.steps[0].capability,
+            role_id=role_id,
+            task_type=task_type,
+        )
 
+    def select_tool_for_capability(
+        self,
+        *,
+        capability_id: str,
+        role_id: str,
+        task_type: str = "",
+    ) -> OrchestrationResult:
+        """Authorize one capability for a role, then select an executable tool.
+
+        This covers role/capability authorization plus tool discovery only.  A
+        successful selection is never permission: policy still decides whether
+        the selected tool may actually run.
+        """
         from agent_registry.authorization import authorize_role_capability
 
         authorization = authorize_role_capability(

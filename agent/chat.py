@@ -125,10 +125,15 @@ def chat(
             temperature=0.7,
         )
     except ProviderError as e:
-        logger.error(f"Chat router failed: {e.message}")
+        # Keep diagnostic details in server logs only.
+        # Never expose provider/internal error details to the user.
+        logger.error("Chat router failed: %s", e.message, exc_info=True)
+
         return ChatResponse(
-            text=f"AI providers unavailable. Details:\n{e.message[:300]}",
-            model="", provider="", tokens_used=0,
+            text="I'm temporarily unable to process your request. Please try again shortly.",
+            model="",
+            provider="",
+            tokens_used=0,
             skills_used=[s.name for s in skills],
             error="router_failure",
         )

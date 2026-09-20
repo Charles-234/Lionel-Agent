@@ -64,6 +64,53 @@ class RequestPlannerTests(unittest.TestCase):
         self.assertIsNotNone(plan)
         self.assertFalse(plan.execution_allowed)
 
+    def test_creates_multi_step_plan_from_explicit_descriptions(self):
+        plan = self.request_planner.create_multi_step_plan(
+            task_type="RECONNAISSANCE",
+            objective="Assess an authorized target",
+            descriptions=[
+                "Identify exposed services",
+                "Document observed endpoints",
+            ],
+            requires_tool=True,
+        )
+
+        self.assertEqual(plan.task_type, "reconnaissance")
+        self.assertEqual(
+            [step.description for step in plan.steps],
+            ["Identify exposed services", "Document observed endpoints"],
+        )
+        self.assertEqual(
+            [step.capability for step in plan.steps],
+            ["reconnaissance", "reconnaissance"],
+        )
+        self.assertTrue(all(step.requires_tool for step in plan.steps))
+        self.assertFalse(plan.execution_allowed)
+
+    def test_multi_step_plan_rejects_missing_descriptions(self):
+        with self.assertRaisesRegex(ValueError, "at least one plan step description"):
+            self.request_planner.create_multi_step_plan(
+                task_type="research",
+                objective="Review the sources",
+                descriptions=[],
+            )
+
+    def test_multi_step_plan_rejects_empty_description(self):
+        with self.assertRaisesRegex(ValueError, "plan step descriptions"):
+            self.request_planner.create_multi_step_plan(
+                task_type="research",
+                objective="Review the sources",
+                descriptions=["Gather sources", "  "],
+            )
+
+    def test_multi_step_plan_rejects_single_string_as_descriptions(self):
+        with self.assertRaisesRegex(ValueError, "at least one plan step description"):
+            self.request_planner.create_multi_step_plan(
+                task_type="research",
+                objective="Review the sources",
+                descriptions="Gather sources",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

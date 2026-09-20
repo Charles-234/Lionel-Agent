@@ -48,7 +48,65 @@ class ToolRegistry:
         execution_mode: str = "real",
         confirmed: bool = False,
     ) -> ToolResult:
-        tool = self.get(name)
+        if not isinstance(name, str) or not name.strip():
+            return ToolResult(
+                success=False,
+                error="Unknown tool requested.",
+                tool_name="",
+                execution_mode=execution_mode,
+                verified=False,
+            )
+        if not isinstance(arguments, dict):
+            return ToolResult(
+                success=False,
+                error="Tool arguments must be supplied as a mapping.",
+                tool_name=name,
+                execution_mode=execution_mode,
+                verified=False,
+            )
+        if len(arguments) > 32:
+            return ToolResult(
+                success=False,
+                error="Too many tool arguments supplied.",
+                tool_name=name,
+                execution_mode=execution_mode,
+                verified=False,
+            )
+        for key, value in arguments.items():
+            if not isinstance(key, str) or not key.strip() or len(key) > 64:
+                return ToolResult(
+                    success=False,
+                    error="Invalid tool argument name.",
+                    tool_name=name,
+                    execution_mode=execution_mode,
+                    verified=False,
+                )
+            if isinstance(value, str) and len(value) > 10_000:
+                return ToolResult(
+                    success=False,
+                    error="Tool argument value is too large.",
+                    tool_name=name,
+                    execution_mode=execution_mode,
+                    verified=False,
+                )
+            if isinstance(value, (list, tuple)) and len(value) > 256:
+                return ToolResult(
+                    success=False,
+                    error="Tool argument list is too large.",
+                    tool_name=name,
+                    execution_mode=execution_mode,
+                    verified=False,
+                )
+        try:
+            tool = self.get(name)
+        except KeyError:
+            return ToolResult(
+                success=False,
+                error="Tool unavailable.",
+                tool_name=name,
+                execution_mode=execution_mode,
+                verified=False,
+            )
         decision = self.policy.evaluate(
             tool,
             arguments,
@@ -65,6 +123,7 @@ class ToolRegistry:
                 tool_name=name,
                 execution_mode=execution_mode,
                 verified=False,
+                requires_confirmation=bool(decision.requires_confirmation),
             )
 
         if execution_mode == "simulation":
@@ -78,12 +137,47 @@ class ToolRegistry:
                     execution_mode="simulation",
                     verified=False,
                 )
-            result = mock_cls().run(**arguments)
+            try:
+                result = mock_cls().run(**arguments)
+            except TypeError:
+                return ToolResult(
+                    success=False,
+                    error="Tool arguments did not match the tool schema.",
+                    tool_name=name,
+                    execution_mode="simulation",
+                    verified=False,
+                )
+            except Exception:
+                return ToolResult(
+                    success=False,
+                    error="Tool execution failed safely without details.",
+                    tool_name=name,
+                    execution_mode="simulation",
+                    verified=False,
+                )
             result.execution_mode = "simulation"
             result.verified = False
             return result
 
-        result = tool.run(**arguments)
+        try:
+            result = tool.run(**arguments)
+        except TypeError:
+            return ToolResult(
+                success=False,
+                error="Tool arguments did not match the tool schema.",
+                tool_name=name,
+                execution_mode=execution_mode,
+                verified=False,
+            )
+        except Exception:
+            # Never echo tool internals, paths, or stderr text to callers.
+            return ToolResult(
+                success=False,
+                error="Tool execution failed safely without details.",
+                tool_name=name,
+                execution_mode=execution_mode,
+                verified=False,
+            )
         result.execution_mode = "real"
         result.verified = bool(decision.metadata.get("verified", False))
         return result
@@ -98,8 +192,9 @@ def get_registry() -> ToolRegistry:
         from tools.recon.subfinder import Subfinder
         from tools.recon.httpx import Httpx
         from tools.recon.nuclei import Nuclei
+        from tools.web_fetcher import WebFetcher
 
         _default_registry = ToolRegistry()
-        for tool in (Subfinder(), Httpx(), Nuclei()):
+        for tool in (Subfinder(), Httpx(), Nuclei(), WebFetcher()):
             _default_registry.register(tool)
     return _default_registry

@@ -17,6 +17,7 @@ class ToolResult:
     execution_mode: str = "real"
     verified: bool = False
     evidence: List[Dict[str, Any]] = field(default_factory=list)
+    requires_confirmation: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -28,6 +29,7 @@ class ToolResult:
             "execution_mode": self.execution_mode,
             "verified": self.verified,
             "evidence": self.evidence,
+            "requires_confirmation": self.requires_confirmation,
         }
 
 
