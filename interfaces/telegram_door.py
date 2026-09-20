@@ -41,6 +41,9 @@ POLLING_LIBRARY_MISSING_MESSAGE = (
     "which is not installed."
 )
 POLLING_STARTED_MESSAGE = "Lionel door is live and listening for the owner."
+
+# Telegram hard-limits each message to 4096 UTF-16 code units (ToS §4.1.5).
+TG_MAX_LENGTH = 4096
 POLLING_START_FAILED_MESSAGE = (
     "Telegram door could not start. Check the server logs."
 )
@@ -76,6 +79,39 @@ class DoorDecision:
 
     allowed: bool
     reason: str
+
+
+def _split_reply(text: str, limit: int = TG_MAX_LENGTH) -> list:
+    """Split *text* into chunks of at most *limit* characters.
+
+    The split always tries to break on a newline boundary so Markdown
+    formatting is preserved. A hard cut is used only when a single line
+    exceeds *limit*.
+    """
+    if len(text) <= limit:
+        return [text]
+
+    chunks: list = []
+    current: list = []
+    current_len = 0
+
+    for line in text.splitlines(keepends=True):
+        if current_len + len(line) > limit:
+            if current:
+                chunks.append("".join(current))
+                current = []
+                current_len = 0
+            # Handle a single line longer than limit – hard-cut it.
+            while len(line) > limit:
+                chunks.append(line[:limit])
+                line = line[limit:]
+        current.append(line)
+        current_len += len(line)
+
+    if current:
+        chunks.append("".join(current))
+
+    return chunks
 
 
 def owner_id() -> int:
@@ -296,7 +332,8 @@ class TelegramDoor:
             if not outgoing:
                 return
             try:
-                await update.effective_message.reply_text(outgoing)
+                for chunk in _split_reply(outgoing):
+                    await update.effective_message.reply_text(chunk)
             except Exception:
                 logger.warning("Failed to send Telegram reply to user %s", user_id)
 

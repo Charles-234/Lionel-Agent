@@ -234,5 +234,49 @@ class TelegramDoorVisionTests(unittest.TestCase):
         self.assertEqual(received["mime"], "image/jpeg")
 
 
+class SplitReplyTests(unittest.TestCase):
+    """Verify _split_reply respects TG_MAX_LENGTH and keeps content intact."""
+
+    def setUp(self):
+        from interfaces.telegram_door import _split_reply
+        self._split = _split_reply
+
+    def test_short_text_not_split(self):
+        text = "Hello world"
+        chunks = self._split(text, limit=100)
+        self.assertEqual(chunks, [text])
+
+    def test_text_at_exact_limit_not_split(self):
+        text = "A" * 100
+        chunks = self._split(text, limit=100)
+        self.assertEqual(chunks, [text])
+
+    def test_multiline_split_on_newline(self):
+        # 3 lines of 60 chars each; limit=100 → first two lines fit (120 > 100)
+        # so it should split after line 1 (60 chars) + line 2 would exceed.
+        line = "X" * 59 + "\n"
+        text = line * 3
+        chunks = self._split(text, limit=100)
+        # All content must be preserved.
+        self.assertEqual("".join(chunks), text)
+        for chunk in chunks:
+            self.assertLessEqual(len(chunk), 100)
+
+    def test_hard_cut_for_single_long_line(self):
+        text = "B" * 250
+        chunks = self._split(text, limit=100)
+        self.assertEqual("".join(chunks), text)
+        for chunk in chunks:
+            self.assertLessEqual(len(chunk), 100)
+
+    def test_full_tg_limit(self):
+        # Simulate a 5000-char reply (> 4096).
+        text = ("Line of text.\n") * 360  # ~5040 chars
+        chunks = self._split(text)  # uses default TG_MAX_LENGTH=4096
+        self.assertEqual("".join(chunks), text)
+        for chunk in chunks:
+            self.assertLessEqual(len(chunk), 4096)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
