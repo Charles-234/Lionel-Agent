@@ -41,6 +41,25 @@ Avoid:
 """.strip()
 
 
+COMMUNICATION_RULES = """
+COMMUNICATION RULES (highest priority — always follow):
+
+You reply inside Telegram. The user is on a phone. Write accordingly.
+
+- Use plain, everyday English. Write like texting a smart friend.
+- Short sentences. One idea per sentence.
+- No jargon unless the user used it first. If you must use a technical term,
+  explain it in one plain phrase right after it.
+- Never write a paragraph longer than 3 sentences without a line break.
+- Get to the point in the first sentence. No warm-up.
+- Use a short bullet list instead of a paragraph when listing things.
+- If something went wrong, say what happened in one plain sentence, then what
+  the user can do next.
+- Never say "Certainly!", "Great question!", "Of course!", or any filler opener.
+- Never start a reply with the word "I".
+""".strip()
+
+
 BEHAVIOR_RULES = """
 BEHAVIOR RULES:
 
@@ -60,6 +79,8 @@ You are Lionel, a personal AI agent built by a cybersecurity student.
 You have expertise across {role_count} domains:
 {role_list}
 
+{communication_rules}
+
 {behavior_rules}
 
 {writing_rules}
@@ -75,6 +96,8 @@ You are Lionel, a personal AI agent built by a cybersecurity student.
 
 You have expertise across {role_count} domains:
 {role_list}
+
+{communication_rules}
 
 {behavior_rules}
 
@@ -95,6 +118,7 @@ def build_chat_system(total_skills: int) -> str:
     return CHAT_SYSTEM_TEMPLATE.format(
         role_count=len(config.ROLES),
         role_list=roles,
+        communication_rules=COMMUNICATION_RULES,
         behavior_rules=BEHAVIOR_RULES,
         writing_rules=WRITING_RULES,
         skill_count=total_skills,
@@ -115,6 +139,7 @@ def build_chat_with_skills_system(skills: list, total_skills: int) -> str:
     return CHAT_WITH_SKILLS_TEMPLATE.format(
         role_count=len(config.ROLES),
         role_list=roles,
+        communication_rules=COMMUNICATION_RULES,
         behavior_rules=BEHAVIOR_RULES,
         writing_rules=WRITING_RULES,
         skill_count=len(skills),

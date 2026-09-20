@@ -311,6 +311,8 @@ class TelegramDoor:
 
             image_bytes = None
             image_mime_type = "image/jpeg"
+
+            # --- Photo ---
             if getattr(message, "photo", None):
                 try:
                     photo = message.photo[-1]
@@ -320,6 +322,53 @@ class TelegramDoor:
                         text = "Please analyze this image and explain what you see."
                 except Exception:
                     logger.warning("Failed to download Telegram photo from user %s", user_id, exc_info=True)
+
+            # --- Document (PDF, Word, txt, etc.) ---
+            elif getattr(message, "document", None):
+                doc = message.document
+                mime = getattr(doc, "mime_type", None) or "application/octet-stream"
+                fname = getattr(doc, "file_name", "") or ""
+                try:
+                    file = await doc.get_file()
+                    image_bytes = bytes(await file.download_as_bytearray())
+                    image_mime_type = mime
+                    if not text:
+                        text = (
+                            f"Please read this document ({fname or mime}) and "
+                            "summarize what it says in plain English."
+                        )
+                except Exception:
+                    logger.warning("Failed to download Telegram document from user %s", user_id, exc_info=True)
+
+            # --- Voice message ---
+            elif getattr(message, "voice", None):
+                voice = message.voice
+                try:
+                    file = await voice.get_file()
+                    image_bytes = bytes(await file.download_as_bytearray())
+                    image_mime_type = "audio/ogg"
+                    if not text:
+                        text = "Please transcribe or describe this voice message."
+                except Exception:
+                    logger.warning("Failed to download Telegram voice from user %s", user_id, exc_info=True)
+
+            # --- Audio file ---
+            elif getattr(message, "audio", None):
+                audio = message.audio
+                mime = getattr(audio, "mime_type", None) or "audio/mpeg"
+                try:
+                    file = await audio.get_file()
+                    image_bytes = bytes(await file.download_as_bytearray())
+                    image_mime_type = mime
+                    if not text:
+                        text = "Please describe or transcribe this audio file."
+                except Exception:
+                    logger.warning("Failed to download Telegram audio from user %s", user_id, exc_info=True)
+
+            # --- Video ---
+            elif getattr(message, "video", None):
+                if not text:
+                    text = "A video was sent. Video analysis is not supported yet. Send a frame as a photo if you want an image described."
 
             incoming = IncomingMessage(
                 user_id=user_id if isinstance(user_id, int) else 0,
@@ -337,10 +386,17 @@ class TelegramDoor:
             except Exception:
                 logger.warning("Failed to send Telegram reply to user %s", user_id)
 
+        _media_filter = (
+            filters.TEXT
+            | filters.PHOTO
+            | filters.Document.ALL
+            | filters.AUDIO
+            | filters.VOICE
+            | filters.VIDEO
+        )
         try:
             application = ApplicationBuilder().token(bot_token).build()
-            # Text and photo handlers carry both plain words, images, and /commands
-            application.add_handler(MessageHandler(filters.TEXT | filters.PHOTO, _handler))
+            application.add_handler(MessageHandler(_media_filter, _handler))
             application.add_handler(CommandHandler("start", _handler))
         except Exception:
             logger.exception("Telegram door failed while building the application.")
