@@ -5,13 +5,18 @@
 $repo = Split-Path -Parent $PSScriptRoot
 $bat  = Join-Path $repo "scripts\start_lionel.bat"
 
+$account = "$env:USERDOMAIN\$env:USERNAME"
 $action    = New-ScheduledTaskAction -Execute $bat -WorkingDirectory $repo
 $trigger   = New-ScheduledTaskTrigger -AtLogOn
-$principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive
+$principal = New-ScheduledTaskPrincipal -UserId $account -LogonType Interactive
 $settings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
 
-Register-ScheduledTask -TaskName "LionelAgentDoor" `
-    -Action $action -Trigger $trigger -Principal $principal `
-    -Settings $settings -Force
-
-Write-Output "Installed: LionelAgentDoor starts at logon -> $bat"
+try {
+    Register-ScheduledTask -TaskName "LionelAgentDoor" `
+        -Action $action -Trigger $trigger -Principal $principal `
+        -Settings $settings -Force -ErrorAction Stop
+    Write-Output "Installed: LionelAgentDoor ($account) starts at logon -> $bat"
+} catch {
+    Write-Output "INSTALL FAILED: $($_.Exception.Message)"
+    exit 1
+}

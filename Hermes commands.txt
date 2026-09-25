@@ -1,0 +1,7 @@
+
+Command	What It Does
+hermes plugins list	See all plugins and their status
+hermes plugins list --plain --no-bundled	Compact view showing only your own plugins
+hermes plugins enable <name>	Turn a plugin on
+hermes plugins disable <name>	Turn a plugin off
+hermes plugins	Interactive toggle UI

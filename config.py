@@ -34,6 +34,14 @@ SERPAPI_API_KEY = _env("SERPAPI_API_KEY")
 HYBRID_ANALYSIS_API_KEY = _env("HYBRID_ANALYSIS_API_KEY")
 NVD_API_KEY = _env("NVD_API_KEY")
 E2B_API_KEY = _env("E2B_API_KEY")
+OVHCLOUD_API_KEY = _env("OVHCLOUD_API_KEY")
+LITELLM_AVAILABLE = True  # Always true after install
+
+# --- IP Intelligence ---
+IPINFO_TOKEN = _env("IPINFO_TOKEN")
+IPGEOLOCATION_API_KEY = _env("IPGEOLOCATION_API_KEY")
+IPINFO_AVAILABLE = bool(IPINFO_TOKEN)
+IPGEOLOCATION_AVAILABLE = bool(IPGEOLOCATION_API_KEY)
 
 # Direct provider keys (OmniRoute bypass)
 GROQ_API_KEY = _env("GROQ_API_KEY")
@@ -41,32 +49,20 @@ CLOUDFLARE_API_TOKEN = _env("CLOUDFLARE_API_TOKEN")
 CLOUDFLARE_ACCOUNT_ID = _env("CLOUDFLARE_ACCOUNT_ID")
 HF_TOKEN = _env("HF_TOKEN")
 
+# Optional local OpenAI-compatible endpoint (Ollama, vLLM, or LM Studio).
+LOCAL_LLM_URL = _env("LOCAL_LLM_URL").rstrip("/")
+LOCAL_LLM_API_KEY = _env("LOCAL_LLM_API_KEY", "local")
+LOCAL_LLM_MODEL = _env("LOCAL_LLM_MODEL", "")
+
 # Budget and logging
 TOKEN_BUDGET_DAILY = int(_env("TOKEN_BUDGET_DAILY", "50000") or "50000")
 LOG_LEVEL = _env("LOG_LEVEL", "INFO").upper()
 
-# The 19 Roles
-ROLES = [
-    "Offensive Security & Penetration Testing",
-    "Digital Forensics & SOC Operations",
-    "Software Engineering & AI Architecture",
-    "UI/UX & 3D Web Development",
-    "Data Engineering & Analytics",
-    "Cloud Infrastructure & Security",
-    "Optical Fiber & Network Infrastructure",
-    "Growth Automation & Business Engineering",
-    "Content Creation & Copywriting",
-    "Virtual Assistant & Personal AI",
-    "Financial Analysis & Investment",
-    "Legal Advisory & Compliance",
-    "Security Auditing & GRC",
-    "Test Automation & Practicals",
-    "Deployment & Operations",
-    "Advanced Malware Reverse Engineering",
-    "Cyber Threat Intelligence",
-    "Malware Analysis & Defensive Evasion Research",
-    "Enterprise Incident Response",
-]
+# The 19 Roles — derived from agent_registry.roles.ROLES to stay in sync.
+# The role names list is used in system prompts; the full Role objects carry
+# capability_categories, risk_level, and other policy metadata.
+from agent_registry.roles import ROLES as _ROLE_REGISTRY
+ROLES = [r.name for r in _ROLE_REGISTRY.values()]
 
 # Routing table - free-first, direct providers primary, OmniRoute opportunistic.
 # Each entry: {"source": "omniroute" | "direct", "provider": ..., "model": ...}
@@ -78,18 +74,21 @@ ROUTING = {
         {"source": "direct", "provider": "cloudflare", "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"},
         {"source": "direct", "provider": "groq", "model": "openai/gpt-oss-20b"},
         {"source": "direct", "provider": "gemini", "model": "gemini-3.1-flash-lite"},
+        {"source": "litellm", "model": "llm7"},
     ],
     "code": [
         {"source": "omniroute", "model": "groq/openai/gpt-oss-120b"},
         {"source": "direct", "provider": "groq", "model": "openai/gpt-oss-120b"},
         {"source": "direct", "provider": "gemini", "model": "gemini-3.6-flash"},
         {"source": "direct", "provider": "cloudflare", "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"},
+        {"source": "litellm", "model": "llm7"},
     ],
     "reasoning": [
         {"source": "omniroute", "model": "groq/openai/gpt-oss-120b"},
         {"source": "direct", "provider": "groq", "model": "openai/gpt-oss-120b"},
         {"source": "direct", "provider": "gemini", "model": "gemini-3.6-flash"},
         {"source": "direct", "provider": "cloudflare", "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"},
+        {"source": "litellm", "model": "llm7"},
     ],
     "vision": [
         {"source": "omniroute", "model": "gemini/gemini-3.6-flash"},
@@ -100,14 +99,24 @@ ROUTING = {
         {"source": "direct", "provider": "groq", "model": "openai/gpt-oss-20b"},
         {"source": "direct", "provider": "gemini", "model": "gemini-3.1-flash-lite"},
         {"source": "direct", "provider": "cloudflare", "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"},
+        {"source": "litellm", "model": "llm7"},
     ],
     "tool_use": [
         {"source": "omniroute", "model": "groq/openai/gpt-oss-120b"},
         {"source": "direct", "provider": "groq", "model": "openai/gpt-oss-120b"},
         {"source": "direct", "provider": "gemini", "model": "gemini-3.6-flash"},
         {"source": "direct", "provider": "cloudflare", "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"},
+        {"source": "litellm", "model": "llm7"},
     ],
 }
+
+if LOCAL_LLM_URL and LOCAL_LLM_MODEL:
+    for _task in ("chat", "code", "reasoning", "classify", "tool_use"):
+        ROUTING[_task].append({
+            "source": "direct",
+            "provider": "local",
+            "model": LOCAL_LLM_MODEL,
+        })
 
 # Dead-model handling
 PROVIDER_COOLDOWN_SECONDS = 86400

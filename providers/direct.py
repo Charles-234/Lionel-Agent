@@ -174,6 +174,52 @@ def _post_with_retries(
     )
 
 
+def call_openai_compatible(
+    model: str,
+    messages: List[Message],
+    base_url: str,
+    api_key: str = "",
+    max_tokens: int = 2000,
+    temperature: float = 0.7,
+) -> Completion:
+    """Call a local OpenAI-compatible server such as Ollama or vLLM."""
+    if not base_url:
+        raise ProviderError("local", model, None, "Local model endpoint is not configured.", permanent=True)
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    payload = {
+        "model": model,
+        "messages": [{"role": message.role, "content": message.content} for message in messages],
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+    }
+    response = _post_with_retries(
+        f"{base_url.rstrip('/')}/v1/chat/completions",
+        headers,
+        payload,
+        "local",
+        model,
+    )
+    if response.status_code != 200:
+        raise _classify_http_error(response, "local", model)
+    data = response.json()
+    choices = data.get("choices", [])
+    text = ((choices[0].get("message", {}).get("content", "")) if choices else "").strip()
+    if not text:
+        raise ProviderError("local", model, 200, "Local provider returned an empty response.")
+    usage = data.get("usage", {}) or {}
+    return Completion(
+        text=text,
+        model=data.get("model", model),
+        provider="local",
+        prompt_tokens=usage.get("prompt_tokens", 0) or 0,
+        completion_tokens=usage.get("completion_tokens", 0) or 0,
+        total_tokens=usage.get("total_tokens", 0) or 0,
+        raw=data,
+    )
+
+
 # ============================================================
 # GROQ
 # ============================================================

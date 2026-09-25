@@ -193,8 +193,13 @@ def get_registry() -> ToolRegistry:
         from tools.recon.httpx import Httpx
         from tools.recon.nuclei import Nuclei
         from tools.web_fetcher import WebFetcher
+        from tools.ip_lookup import IPLookup
+        from tools.filesystem import FileSystemTool
+        from tools.e2b_sandbox import E2BSandboxTool
 
         _default_registry = ToolRegistry()
-        for tool in (Subfinder(), Httpx(), Nuclei(), WebFetcher()):
+        for tool in (Subfinder(), Httpx(), Nuclei(), WebFetcher(), IPLookup()):
             _default_registry.register(tool)
+        _default_registry.register(FileSystemTool(), source="builtin")
+        _default_registry.register(E2BSandboxTool(), source="builtin")
     return _default_registry

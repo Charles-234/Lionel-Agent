@@ -14,8 +14,17 @@ from providers.types import Message, ProviderError
 from skills import retriever
 from agent import prompts
 from memory import history
+from attachments import AttachmentInput, extract_attachment
+from agent.safety import sanitize_for_display
 
 logger = logging.getLogger(__name__)
+
+
+def _is_vision_payload(mime_type: Optional[str]) -> bool:
+    """Only true image MIME types should trigger the vision-capable route."""
+    if not mime_type:
+        return False
+    return mime_type.lower().startswith("image/")
 
 
 # Skill count heuristic
@@ -53,6 +62,9 @@ def chat(
     include_skills: bool = True,
     image_bytes: Optional[bytes] = None,
     image_mime_type: str = "image/jpeg",
+    attachment_bytes: Optional[bytes] = None,
+    attachment_mime_type: str = "application/octet-stream",
+    attachment_name: str = "attachment",
 ) -> ChatResponse:
     """
     Process one chat turn.
@@ -72,16 +84,39 @@ def chat(
             text="(empty message)", model="", provider="",
             tokens_used=0, skills_used=[], error="empty",
         )
+
+    attachment_note = ""
+    if attachment_bytes is not None:
+        extracted = extract_attachment(
+            AttachmentInput(
+                data=attachment_bytes,
+                mime_type=attachment_mime_type,
+                filename=attachment_name,
+            )
+        )
+        attachment_note = f"[ATTACHMENT CONTEXT]\n{extracted.context}\n[/ATTACHMENT CONTEXT]\n"
+    if image_bytes is not None and not _is_vision_payload(image_mime_type):
+        mime = (image_mime_type or "unknown").strip() or "unknown"
+        if not attachment_note:
+            attachment_note = (
+                f"[Attached file: {mime}. "
+                "This is not a direct image and no extracted content was supplied.] "
+            )
+        image_bytes = None
+
     if not user_message and image_bytes:
         user_message = "Please analyze this image and explain what you see."
+    elif attachment_note and user_message:
+        user_message = f"{attachment_note}{user_message}"
+    elif attachment_note:
+        user_message = attachment_note.rstrip()
 
     # 1. Budget check
     estimated = 500 + len(user_message) // 4  # rough prompt estimate
     if not token_budget.can_afford(user_id, estimated):
         return ChatResponse(
             text=(
-                f"Daily token budget reached ({config.TOKEN_BUDGET_DAILY} tokens). "
-                f"Try again after UTC midnight, or ask an admin to raise the cap."
+                "I've reached my usage limit for today. Please try again tomorrow."
             ),
             model="", provider="", tokens_used=0, skills_used=[],
             error="budget_exceeded",
@@ -128,7 +163,7 @@ def chat(
     )
 
     # 5. Call router
-    task_type = "vision" if image_bytes else "chat"
+    task_type = "vision" if image_bytes and _is_vision_payload(image_mime_type) else "chat"
     try:
         completion = router.call_with_failover(
             task_type=task_type,
@@ -156,10 +191,11 @@ def chat(
     # 7. Store history
     hist_entry = f"[Image attached] {user_message}" if image_bytes else user_message
     h.add("user", hist_entry)
-    h.add("assistant", completion.text)
+    cleaned_text = sanitize_for_display(completion.text)
+    h.add("assistant", cleaned_text)
 
     return ChatResponse(
-        text=completion.text,
+        text=cleaned_text,
         model=completion.model,
         provider=completion.provider,
         tokens_used=completion.total_tokens,

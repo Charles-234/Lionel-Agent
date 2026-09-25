@@ -101,6 +101,19 @@ class TelegramDoorTests(unittest.TestCase):
         self.assertEqual(reply.text, "I could not handle that. Try again.")
         self.assertNotIn("sk-secret", reply.text)
 
+    def test_rate_limit_refuses_bursts_before_core(self):
+        calls = []
+        door = TelegramDoor(core_handler=lambda text: calls.append(text) or "ok")
+
+        for i in range(20):
+            reply = door.handle(IncomingMessage(user_id=12345, text=f"msg {i}"))
+            if i < 19:
+                self.assertEqual(reply.text, f"ok")
+
+        blocked = door.handle(IncomingMessage(user_id=12345, text="too many"))
+        self.assertEqual(blocked.text, "Too many messages. Please wait a moment and try again.")
+        self.assertEqual(len(calls), 20)
+
     def test_polling_missing_library_says_so_plainly(self):
         saved = sys.modules.get("telegram")
         sys.modules["telegram"] = None
@@ -121,6 +134,19 @@ class TelegramDoorTests(unittest.TestCase):
         for text in ("/help", "/start", "/status"):
             reply = door.handle(IncomingMessage(user_id=12345, text=text))
             self.assertNotIn(token, reply.text)
+
+    def test_long_replies_keep_content_and_formatting(self):
+        from agent.safety import sanitize_for_display
+
+        long_text = "# Section\n\n" + "Line one\n\n" + ("detail " * 600) + "\n\n```bash\necho hello\n```"
+        cleaned = sanitize_for_display(long_text)
+
+        self.assertIn("# Section", cleaned)
+        self.assertIn("```bash", cleaned)
+        self.assertIn("echo hello", cleaned)
+        self.assertIn("Line one", cleaned)
+        self.assertTrue(len(cleaned) > 1000)
+        self.assertNotIn("\n\n\n", cleaned)
 
 
 class AllowlistDoorTests(unittest.TestCase):

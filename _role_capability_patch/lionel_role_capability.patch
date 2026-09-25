@@ -1,0 +1,280 @@
+--- a/agent_registry/authorization.py
++++ b/agent_registry/authorization.py
+@@ -0,0 +1,54 @@
++"""Role -> capability authorization for Lionel.
++
++This module is the authoritative bridge between the declarative role registry
++and the capability registry. Tool authorization remains in the tool/policy layers.
++"""
++from dataclasses import dataclass
++from typing import List, Optional
++
++from agent_registry.roles import ROLES
++from agent_registry.capabilities import CAPABILITIES
++
++
++@dataclass(frozen=True)
++class RoleCapabilityDecision:
++    allowed: bool
++    reason: str
++    role_id: Optional[str] = None
++    capability_id: Optional[str] = None
++
++
++def get_role_capabilities(role_id: str) -> List[str]:
++    """Return the capability IDs declared by a role."""
++    return list(ROLES[role_id].capability_categories)
++
++
++def validate_role_capability_contract() -> List[str]:
++    """Return role capability references that are missing from the registry."""
++    errors = []
++    for role in ROLES.values():
++        for capability_id in role.capability_categories:
++            if capability_id not in CAPABILITIES:
++                errors.append(
++                    f"Role '{role.id}' references undefined capability '{capability_id}'."
++                )
++    return errors
++
++
++def authorize_role_capability(
++    role_id: Optional[str], capability_id: Optional[str]
++) -> RoleCapabilityDecision:
++    """Authorize a capability only when the active role declares it."""
++    if not role_id:
++        return RoleCapabilityDecision(False, "Role context is required for capability authorization.", role_id, capability_id)
++    if role_id not in ROLES:
++        return RoleCapabilityDecision(False, "Unknown role.", role_id, capability_id)
++    if not capability_id:
++        return RoleCapabilityDecision(False, "Capability context is required for role authorization.", role_id, capability_id)
++    if capability_id not in CAPABILITIES:
++        return RoleCapabilityDecision(False, "Unknown capability.", role_id, capability_id)
++    if capability_id not in ROLES[role_id].capability_categories:
++        return RoleCapabilityDecision(False, "Capability is not authorized for this role.", role_id, capability_id)
++    if not CAPABILITIES[capability_id].enabled:
++        return RoleCapabilityDecision(False, "Capability is disabled.", role_id, capability_id)
++    return RoleCapabilityDecision(True, "Role is authorized for capability.", role_id, capability_id)
+--- a/agent_registry/capabilities.py
++++ b/agent_registry/capabilities.py
+@@ -48,6 +48,12 @@
+     "editing": Capability("editing", "Editing", "content", "Review and improve supplied content.", ["text", "document"]),
+     "organization": Capability("organization", "Organization", "productivity", "Organize information and tasks.", ["text", "structured_data"]),
+     "intelligence": Capability("intelligence", "Threat Intelligence", "security", "Correlate intelligence from permitted sources.", ["text", "structured_data"], True, True, "high"),
++    "architecture": Capability("architecture", "Architecture", "software", "Software and AI system architecture workflows.", ["text", "code", "structured_data"], True, False, "medium"),
++    "frontend": Capability("frontend", "Frontend Engineering", "web", "Frontend implementation and interface engineering.", ["text", "image", "code"], True, False, "medium"),
++    "data_engineering": Capability("data_engineering", "Data Engineering", "data", "Data processing, pipelines, and engineering workflows.", ["text", "code", "structured_data"], True, False, "medium"),
++    "diagnostics": Capability("diagnostics", "Diagnostics", "infrastructure", "Infrastructure and system diagnostic workflows.", ["text", "structured_data"], True, True, "medium"),
++    "analytics": Capability("analytics", "Analytics", "data", "Analytical and metrics-oriented workflows.", ["text", "structured_data"], True, False, "medium"),
++    "incident_response": Capability("incident_response", "Incident Response", "security", "Authorized incident handling, containment, and recovery support.", ["text", "document", "structured_data"], True, True, "high"),
+ }
+ 
+ 
+--- a/tools/policy.py
++++ b/tools/policy.py
+@@ -49,24 +49,36 @@
+         execution_mode: str = "real",
+         confirmed: bool = False,
+         capability_id: Optional[str] = None,
++        role_id: Optional[str] = None,
+     ) -> PolicyDecision:
+         if execution_mode not in {"real", "simulation"}:
+             return PolicyDecision(False, "Unsupported execution mode.")
+ 
++        # Role -> capability authorization is checked before capability -> tool.
++        if role_id is None:
++            return PolicyDecision(False, "Role context is required for capability authorization.")
++        if capability_id is None:
++            return PolicyDecision(False, "Capability context is required for role authorization.")
++
++        try:
++            from agent_registry.authorization import authorize_role_capability
++            role_decision = authorize_role_capability(role_id, capability_id)
++        except ImportError:
++            return PolicyDecision(False, "Role authorization subsystem is unavailable.")
++
++        if not role_decision.allowed:
++            return PolicyDecision(False, role_decision.reason)
++
+         # Capability -> tool mapping is checked before execution.
+-        if capability_id is None:
+-            if getattr(tool, "risk_level", "low") in {"high", "critical"} or getattr(tool, "network_access", False):
+-                return PolicyDecision(False, "Capability context is required for this tool.")
+-        else:
+-            try:
+-                from tools_registry import get_tool
+-                spec = get_tool(tool.name)
+-            except (ImportError, KeyError):
+-                return PolicyDecision(False, "Tool is not registered in the capability registry.")
+-            if not spec.enabled or not spec.implemented:
+-                return PolicyDecision(False, "Tool is not enabled for execution.")
+-            if capability_id not in spec.capabilities:
+-                return PolicyDecision(False, "Requested capability is not authorized for this tool.")
++        try:
++            from tools_registry import get_tool
++            spec = get_tool(tool.name)
++        except (ImportError, KeyError):
++            return PolicyDecision(False, "Tool is not registered in the capability registry.")
++        if not spec.enabled or not spec.implemented:
++            return PolicyDecision(False, "Tool is not enabled for execution.")
++        if capability_id not in spec.capabilities:
++            return PolicyDecision(False, "Requested capability is not authorized for this tool.")
+ 
+         if execution_mode == "simulation":
+             if not getattr(tool, "supports_simulation", False):
+--- a/tools/registry.py
++++ b/tools/registry.py
+@@ -43,6 +43,7 @@
+         arguments: Dict[str, Any],
+         *,
+         capability_id: Optional[str] = None,
++        role_id: Optional[str] = None,
+         scope: Optional[AuthorizationScope] = None,
+         execution_mode: str = "real",
+         confirmed: bool = False,
+@@ -55,6 +56,7 @@
+             execution_mode=execution_mode,
+             confirmed=confirmed,
+             capability_id=capability_id,
++            role_id=role_id,
+         )
+         if not decision.allowed:
+             return ToolResult(
+--- a/tools/executor.py
++++ b/tools/executor.py
+@@ -35,6 +35,7 @@
+     args: Optional[dict] = None,
+     *,
+     capability: Optional[str] = None,
++    capability_id: Optional[str] = None,
+     scope: Any = None,
+     execution_mode: str = "real",
+     confirmed: bool = False,
+@@ -47,23 +48,31 @@
+     not silently authorize a tool, so a ledger write failure aborts before
+     execution.
+     """
++    if capability is not None and capability_id is not None and capability != capability_id:
++        raise ValueError("capability and capability_id disagree")
++    capability_id = capability_id if capability_id is not None else capability
++
++    tool_name = getattr(tool, "name", tool if isinstance(tool, str) else tool.__class__.__name__)
++    started = time.time()
++
+     ledger = get_audit_ledger()
+     target = _target_from_args(args)
+     record_request(
+         ledger,
+         session_id=session_id,
+         role=role,
+-        capability=capability,
+-        tool=getattr(tool, "name", tool.__class__.__name__),
++        capability=capability_id,
++        tool=tool_name,
+         execution_mode=execution_mode,
+         target=target,
+     )
+ 
+     registry = get_registry()
+     result = registry.authorize_and_run(
+-        tool,
+-        args=args or {},
+-        capability=capability,
++        tool_name,
++        args or {},
++        capability_id=capability_id,
++        role_id=role,
+         scope=scope,
+         execution_mode=execution_mode,
+         confirmed=confirmed,
+@@ -74,8 +83,8 @@
+         started=started,
+         session_id=session_id,
+         role=role,
+-        capability=capability,
+-        tool=getattr(tool, "name", tool.__class__.__name__),
++        capability=capability_id,
++        tool=tool_name,
+         execution_mode=getattr(result, "execution_mode", execution_mode),
+         target=target,
+         result=result,
+--- a/tests/test_capability_gate.py
++++ b/tests/test_capability_gate.py
+@@ -20,6 +20,7 @@
+             "subfinder",
+             {"domain": "example.com"},
+             capability_id="reconnaissance",
++            role="offensive_security",
+             execution_mode="simulation",
+         )
+         self.assertTrue(result.success)
+@@ -31,6 +32,7 @@
+             "subfinder",
+             {"domain": "example.com"},
+             capability_id="web_design",
++            role="offensive_security",
+             execution_mode="simulation",
+         )
+         self.assertFalse(result.success)
+@@ -40,6 +42,7 @@
+         result = execute(
+             "subfinder",
+             {"domain": "example.com"},
++            role="offensive_security",
+             execution_mode="simulation",
+         )
+         self.assertFalse(result.success)
+@@ -50,6 +53,7 @@
+             "subfinder",
+             {"domain": "example.com"},
+             capability_id="reconnaissance",
++            role="offensive_security",
+             execution_mode="real",
+         )
+         self.assertFalse(result.success)
+@@ -60,6 +64,7 @@
+             "subfinder",
+             {"domain": "example.com"},
+             capability_id="reconnaissance",
++            role="offensive_security",
+             scope=self.scope,
+             execution_mode="real",
+         )
+--- /dev/null
++++ b/tests/test_role_capability_authorization.py
+@@ -0,0 +1,35 @@
++import unittest
++
++from agent_registry.authorization import (
++    authorize_role_capability,
++    validate_role_capability_contract,
++)
++
++
++class RoleCapabilityAuthorizationTests(unittest.TestCase):
++    def test_contract_has_no_undefined_capabilities(self):
++        self.assertEqual(validate_role_capability_contract(), [])
++
++    def test_offensive_security_can_use_reconnaissance(self):
++        self.assertTrue(authorize_role_capability("offensive_security", "reconnaissance").allowed)
++
++    def test_offensive_security_can_use_security_testing(self):
++        self.assertTrue(authorize_role_capability("offensive_security", "security_testing").allowed)
++
++    def test_virtual_assistant_cannot_use_reconnaissance(self):
++        decision = authorize_role_capability("virtual_assistant", "reconnaissance")
++        self.assertFalse(decision.allowed)
++        self.assertIn("not authorized", decision.reason.lower())
++
++    def test_unknown_role_is_denied(self):
++        self.assertFalse(authorize_role_capability("does_not_exist", "research").allowed)
++
++    def test_unknown_capability_is_denied(self):
++        self.assertFalse(authorize_role_capability("offensive_security", "does_not_exist").allowed)
++
++    def test_missing_role_is_denied(self):
++        self.assertFalse(authorize_role_capability(None, "research").allowed)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)

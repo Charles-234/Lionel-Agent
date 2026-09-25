@@ -8,6 +8,7 @@ refusals, cleaning, and fail-closed proof labels only.
 import unittest
 
 from agent.safety import (
+    MAX_DISPLAY_CHARS,
     SafetyError,
     check_request,
     sanitize_for_display,
@@ -38,7 +39,19 @@ class InputSafetyTests(unittest.TestCase):
         self.assertNotIn("\x00", cleaned)
 
     def test_sanitize_caps_length(self):
-        self.assertTrue(sanitize_for_display("y" * 2_000).endswith("..."))
+        large = "y" * (MAX_DISPLAY_CHARS + 100)
+        self.assertTrue(sanitize_for_display(large).endswith("..."))
+
+    def test_sanitize_removes_hidden_reasoning_blocks(self):
+        dirty = "<think>private scratch work</think>Final answer: The file is valid."
+        cleaned = sanitize_for_display(dirty)
+        self.assertNotIn("private scratch work", cleaned)
+        self.assertIn("Final answer: The file is valid.", cleaned)
+
+    def test_sanitize_removes_labeled_reasoning_before_answer(self):
+        dirty = "Thinking: compare every possibility first.\nAnswer: It is a PDF."
+        cleaned = sanitize_for_display(dirty)
+        self.assertEqual(cleaned, "It is a PDF.")
 
     def test_verify_never_trusts_simulation(self):
         verdict = verification_status(success=True, evidence_present=True,

@@ -18,7 +18,7 @@ TOO_LONG_MESSAGE = "Request text is too long to handle safely."
 BAD_TYPE_MESSAGE = "Request text must be words, not another data type."
 
 MAX_REQUEST_CHARS = 10_000
-MAX_DISPLAY_CHARS = 1_000
+MAX_DISPLAY_CHARS = 20_000
 
 _SECRET_PATTERNS = [
     re.compile(r"(?i)\b(?:api[_-]?key|token|secret|password|authorization)\b\s*[:=]\s*\S+"),
@@ -26,6 +26,13 @@ _SECRET_PATTERNS = [
     re.compile(r"(?i)\bsk-[A-Za-z0-9_-]{8,}"),
 ]
 _CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+_HIDDEN_REASONING_BLOCK = re.compile(
+    r"(?is)<(?:think|analysis|reasoning)>.*?</(?:think|analysis|reasoning)>"
+)
+_LABELED_REASONING = re.compile(
+    r"(?is)^\s*(?:thinking|analysis|reasoning|internal thoughts?)\s*:.*?"
+    r"(?:\n\s*(?:final answer|answer)\s*:)(?:\s*)"
+)
 
 
 class SafetyError(ValueError):
@@ -60,14 +67,31 @@ def check_request(raw_text: Any) -> CheckedRequest:
 
 
 def sanitize_for_display(value: Any) -> str:
-    """Clean one value so it is safe to show on an outside screen."""
+    """Clean one value so it is safe to show on an outside screen.
+
+    Long replies are still allowed to flow through Telegram in chunks; this
+    function preserves structured Markdown and newline boundaries instead of
+    flattening everything into a single paragraph.
+    """
     text = "" if value is None else str(value)
+    text = _HIDDEN_REASONING_BLOCK.sub("", text)
+    text = _LABELED_REASONING.sub("", text)
     text = _CONTROL_CHARS.sub("", text)
     for pattern in _SECRET_PATTERNS:
         text = pattern.sub("[REDACTED]", text)
-    text = " ".join(text.split())
+
+    # Preserve document structure for Markdown/code blocks while collapsing
+    # accidental whitespace noise.  We keep line breaks since Telegram replies
+    # are chunked later and markdown fences are a valid part of the payload.
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = "\n".join(" ".join(line.split()) for line in text.split("\n"))
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+
     if len(text) > MAX_DISPLAY_CHARS:
-        text = text[:MAX_DISPLAY_CHARS] + "..."
+        text = text[:MAX_DISPLAY_CHARS].rstrip()
+        if text and not text.endswith("\n"):
+            text += "\n"
+        text += "..."
     return text
 
 

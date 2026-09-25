@@ -22,8 +22,10 @@ as before.
 from __future__ import annotations
 
 import logging
+import time
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Deque, DefaultDict, List, Optional
 
 import config
 
@@ -54,6 +56,9 @@ COMMANDS_UNAVAILABLE_MESSAGE = (
 DOOR_HELP_FALLBACK_MESSAGE = (
     "Lionel door is live. Send a message, or try /help."
 )
+RATE_LIMIT_MESSAGE = "Too many messages. Please wait a moment and try again."
+MAX_MESSAGES_PER_WINDOW = 20
+RATE_LIMIT_WINDOW_SECONDS = 60
 
 
 @dataclass(frozen=True)
@@ -64,6 +69,9 @@ class IncomingMessage:
     text: str
     image_bytes: Optional[bytes] = None
     image_mime_type: str = "image/jpeg"
+    attachment_bytes: Optional[bytes] = None
+    attachment_mime_type: str = "application/octet-stream"
+    attachment_name: str = "attachment"
 
 
 @dataclass(frozen=True)
@@ -138,8 +146,11 @@ def screen_message(message: Any) -> DoorDecision:
     if user_id != owner_id():
         return DoorDecision(allowed=False, reason=STRANGER_REFUSED_MESSAGE)
     text = getattr(message, "text", "")
-    has_image = bool(getattr(message, "image_bytes", None))
-    if not isinstance(text, str) or (not text.strip() and not has_image):
+    has_payload = bool(
+        getattr(message, "image_bytes", None)
+        or getattr(message, "attachment_bytes", None)
+    )
+    if not isinstance(text, str) or (not text.strip() and not has_payload):
         return DoorDecision(allowed=False, reason=EMPTY_MESSAGE)
     return DoorDecision(allowed=True, reason="Owner message may enter.")
 
@@ -199,12 +210,25 @@ def _dispatch_message(door: TelegramDoor, message: IncomingMessage) -> OutgoingR
         return OutgoingReply(text="Core is not connected yet.")
     img_bytes = getattr(message, "image_bytes", None)
     img_mime = getattr(message, "image_mime_type", "image/jpeg")
+    attachment_bytes = getattr(message, "attachment_bytes", None)
+    attachment_mime = getattr(message, "attachment_mime_type", "application/octet-stream")
+    attachment_name = getattr(message, "attachment_name", "attachment")
     try:
-        if img_bytes is not None:
+        if img_bytes is not None or attachment_bytes is not None:
             try:
-                reply = door.core_handler(message.text, img_bytes, img_mime)
+                reply = door.core_handler(
+                    message.text,
+                    img_bytes,
+                    img_mime,
+                    attachment_bytes,
+                    attachment_mime,
+                    attachment_name,
+                )
             except TypeError:
-                reply = door.core_handler(message.text)
+                try:
+                    reply = door.core_handler(message.text, img_bytes, img_mime)
+                except TypeError:
+                    reply = door.core_handler(message.text)
         else:
             reply = door.core_handler(message.text)
     except Exception:
@@ -264,9 +288,35 @@ class TelegramDoor:
     core_handler: Optional[Callable[[str], str]] = None
     refused_strangers: List[int] = field(default_factory=list)
     allowed_users: Optional["IdentityRegistry"] = None
+    _recent_messages: DefaultDict[int, Deque[float]] = field(
+        default_factory=lambda: defaultdict(deque),
+        init=False,
+        repr=False,
+    )
+
+    def _rate_limit_exceeded(self, user_id: int) -> bool:
+        """Return True when a user has burst past the bounded Telegram window.
+
+        The owner is never rate-limited. Everyone else is bounded.
+        """
+        if not isinstance(user_id, int) or user_id <= 0:
+            return False
+        if user_id == owner_id():
+            return False  # owner is never rate-limited
+        now = time.monotonic()
+        bucket = self._recent_messages[user_id]
+        window_start = now - RATE_LIMIT_WINDOW_SECONDS
+        while bucket and bucket[0] <= window_start:
+            bucket.popleft()
+        if len(bucket) >= MAX_MESSAGES_PER_WINDOW:
+            return True
+        bucket.append(now)
+        return False
 
     def handle(self, message: IncomingMessage) -> OutgoingReply:
         """Carry one message in and one safe reply out."""
+        if self._rate_limit_exceeded(message.user_id):
+            return OutgoingReply(text=RATE_LIMIT_MESSAGE)
         return _dispatch_message(self, message)
 
     def note_stranger(self, user_id: Any) -> None:
@@ -311,8 +361,11 @@ class TelegramDoor:
 
             image_bytes = None
             image_mime_type = "image/jpeg"
+            attachment_bytes = None
+            attachment_mime_type = "application/octet-stream"
+            attachment_name = "attachment"
 
-            # --- Photo ---
+                    # --- Photo ---
             if getattr(message, "photo", None):
                 try:
                     photo = message.photo[-1]
@@ -330,25 +383,38 @@ class TelegramDoor:
                 fname = getattr(doc, "file_name", "") or ""
                 try:
                     file = await doc.get_file()
-                    image_bytes = bytes(await file.download_as_bytearray())
-                    image_mime_type = mime
-                    if not text:
-                        text = (
-                            f"Please read this document ({fname or mime}) and "
-                            "summarize what it says in plain English."
-                        )
+                    payload = bytes(await file.download_as_bytearray())
+                    if mime.lower().startswith("image/"):
+                        image_bytes = payload
+                        image_mime_type = mime
+                    else:
+                        image_bytes = None
+                        image_mime_type = mime
+                        label = fname or mime
+                        text = f"Attachment received: {label}. " + (text or "Please summarize or extract the useful text from this file.")
+                    attachment_bytes = payload
+                    attachment_mime_type = mime
+                    attachment_name = fname or "document"
                 except Exception:
                     logger.warning("Failed to download Telegram document from user %s", user_id, exc_info=True)
+                if image_bytes is None and not text:
+                    text = (
+                        f"Please read this document ({fname or mime}) and "
+                        "summarize what it says in plain English."
+                    )
 
             # --- Voice message ---
             elif getattr(message, "voice", None):
                 voice = message.voice
                 try:
                     file = await voice.get_file()
-                    image_bytes = bytes(await file.download_as_bytearray())
-                    image_mime_type = "audio/ogg"
-                    if not text:
-                        text = "Please transcribe or describe this voice message."
+                    payload = bytes(await file.download_as_bytearray())
+                    image_bytes = None
+                    image_mime_type = getattr(voice, "mime_type", "audio/ogg") or "audio/ogg"
+                    text = (text or "") + " Audio attachment received. Please transcribe or identify the spoken content."
+                    attachment_bytes = payload
+                    attachment_mime_type = getattr(voice, "mime_type", "audio/ogg") or "audio/ogg"
+                    attachment_name = "voice.ogg"
                 except Exception:
                     logger.warning("Failed to download Telegram voice from user %s", user_id, exc_info=True)
 
@@ -358,23 +424,37 @@ class TelegramDoor:
                 mime = getattr(audio, "mime_type", None) or "audio/mpeg"
                 try:
                     file = await audio.get_file()
-                    image_bytes = bytes(await file.download_as_bytearray())
+                    payload = bytes(await file.download_as_bytearray())
+                    image_bytes = None
                     image_mime_type = mime
-                    if not text:
-                        text = "Please describe or transcribe this audio file."
+                    text = (text or "") + " Audio attachment received. Please describe or transcribe this audio file."
+                    attachment_bytes = payload
+                    attachment_mime_type = mime
+                    attachment_name = getattr(audio, "file_name", None) or "audio"
                 except Exception:
                     logger.warning("Failed to download Telegram audio from user %s", user_id, exc_info=True)
 
             # --- Video ---
             elif getattr(message, "video", None):
-                if not text:
-                    text = "A video was sent. Video analysis is not supported yet. Send a frame as a photo if you want an image described."
+                video = message.video
+                mime = getattr(video, "mime_type", None) or "video/mp4"
+                try:
+                    file = await video.get_file()
+                    attachment_bytes = bytes(await file.download_as_bytearray())
+                    attachment_mime_type = mime
+                    attachment_name = getattr(video, "file_name", None) or "video"
+                    text = (text or "") + " Video attachment received. Inspect its available metadata and explain what additional analysis is possible."
+                except Exception:
+                    logger.warning("Failed to download Telegram video from user %s", user_id, exc_info=True)
 
             incoming = IncomingMessage(
                 user_id=user_id if isinstance(user_id, int) else 0,
                 text=text,
                 image_bytes=image_bytes,
                 image_mime_type=image_mime_type,
+                attachment_bytes=attachment_bytes,
+                attachment_mime_type=attachment_mime_type,
+                attachment_name=attachment_name,
             )
             reply = door.handle(incoming)
             outgoing = reply.text
@@ -419,6 +499,9 @@ def run_chat_through_door(
     include_skills: bool = True,
     image_bytes: Optional[bytes] = None,
     image_mime_type: str = "image/jpeg",
+    attachment_bytes: Optional[bytes] = None,
+    attachment_mime_type: str = "application/octet-stream",
+    attachment_name: str = "attachment",
 ) -> OutgoingReply:
     """
     Run one chat turn through Lionel's chat mode, then return a safe reply.
@@ -436,6 +519,9 @@ def run_chat_through_door(
         include_skills=include_skills,
         image_bytes=image_bytes,
         image_mime_type=image_mime_type,
+        attachment_bytes=attachment_bytes,
+        attachment_mime_type=attachment_mime_type,
+        attachment_name=attachment_name,
     )
     return OutgoingReply(text=sanitize_for_display(reply.text))
 
@@ -448,13 +534,16 @@ def set_door_to_chat_mode(
     """
     Plug the chat brain into the door so it can answer owned messages.
     """
-    door.core_handler = lambda text, img=None, mime="image/jpeg": run_chat_through_door(
+    door.core_handler = lambda text, img=None, mime="image/jpeg", attachment=None, attachment_mime="application/octet-stream", attachment_name="attachment": run_chat_through_door(
         door,
         user_id=owner_id(),
         text=text,
         include_skills=skill_mode,
         image_bytes=img,
         image_mime_type=mime,
+        attachment_bytes=attachment,
+        attachment_mime_type=attachment_mime,
+        attachment_name=attachment_name,
     ).text
 
 

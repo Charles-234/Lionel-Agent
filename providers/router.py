@@ -109,6 +109,11 @@ def _call_omniroute(model: str, messages: List[Message], max_tokens: int, temper
     return omniroute.call(model, messages, max_tokens=max_tokens, temperature=temperature)
 
 
+def _call_litellm(model: str, messages, max_tokens: int, temperature: float):
+    from providers import litellm_group
+    return litellm_group.call_litellm(messages, max_tokens, temperature)
+
+
 def _call_direct(provider: str, model: str, messages: List[Message], max_tokens: int, temperature: float) -> Completion:
     """Call direct provider client."""
     from providers import direct
@@ -120,6 +125,15 @@ def _call_direct(provider: str, model: str, messages: List[Message], max_tokens:
         return direct.call_cloudflare(model, messages, max_tokens=max_tokens, temperature=temperature)
     if provider == "huggingface":
         return direct.call_huggingface(model, messages, max_tokens=max_tokens, temperature=temperature)
+    if provider == "local":
+        return direct.call_openai_compatible(
+            model,
+            messages,
+            base_url=config.LOCAL_LLM_URL,
+            api_key=config.LOCAL_LLM_API_KEY,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
     raise ProviderError(
         provider=provider, model=model, status_code=None,
         message=f"Unknown direct provider: {provider}",
@@ -163,6 +177,8 @@ def call_with_failover(
                 completion = _call_omniroute(model, messages, max_tokens, temperature)
             elif source == "direct":
                 completion = _call_direct(provider, model, messages, max_tokens, temperature)
+            elif source == "litellm":
+                completion = _call_litellm(model, messages, max_tokens, temperature)
             else:
                 logger.error(f"Router: unknown source '{source}' for {label}")
                 continue

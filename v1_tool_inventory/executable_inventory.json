@@ -1,0 +1,116 @@
+[
+  {
+    "available": false,
+    "category": "recon",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Passively enumerate subdomains for a domain using subfinder",
+    "enabled": true,
+    "filesystem_access": false,
+    "name": "subfinder",
+    "network_access": true,
+    "provenance": "builtin",
+    "registry_source": "builtin",
+    "requires_authorized_target": true,
+    "requires_binary": "subfinder",
+    "risk_level": "medium",
+    "schema": {
+      "properties": {
+        "domain": {
+          "description": "Target domain",
+          "type": "string"
+        },
+        "silent": {
+          "default": true,
+          "type": "boolean"
+        },
+        "timeout_sec": {
+          "default": 120,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "domain"
+      ],
+      "type": "object"
+    },
+    "supports_simulation": true,
+    "version": "1.0.0"
+  },
+  {
+    "available": false,
+    "category": "recon",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Probe HTTP services on a list of hosts using httpx",
+    "enabled": true,
+    "filesystem_access": false,
+    "name": "httpx",
+    "network_access": true,
+    "provenance": "builtin",
+    "registry_source": "builtin",
+    "requires_authorized_target": true,
+    "requires_binary": "httpx",
+    "risk_level": "medium",
+    "schema": {
+      "properties": {
+        "hosts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "timeout_sec": {
+          "default": 120,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "hosts"
+      ],
+      "type": "object"
+    },
+    "supports_simulation": true,
+    "version": "1.0.0"
+  },
+  {
+    "available": false,
+    "category": "recon",
+    "confirmation_required": true,
+    "credentials_required": false,
+    "description": "Template-based vulnerability scan using nuclei",
+    "enabled": true,
+    "filesystem_access": false,
+    "name": "nuclei",
+    "network_access": true,
+    "provenance": "builtin",
+    "registry_source": "builtin",
+    "requires_authorized_target": true,
+    "requires_binary": "nuclei",
+    "risk_level": "high",
+    "schema": {
+      "properties": {
+        "severity": {
+          "default": "medium,high,critical",
+          "type": "string"
+        },
+        "targets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "timeout_sec": {
+          "default": 300,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "targets"
+      ],
+      "type": "object"
+    },
+    "supports_simulation": true,
+    "version": "1.0.0"
+  }
+]

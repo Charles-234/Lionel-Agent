@@ -1,0 +1,10 @@
+agentql via npx (command=npx)
+  connect: FAILED after 0.0s -> FileNotFoundError: [WinError 2] The system cannot find the file specified
+agentql via npx.cmd (command=npx.cmd)
+  connect: FAILED after 52.6s -> MCPTransportError: MCP stdio server returned no response.
+clicksend via npx (command=npx)
+  connect: FAILED after 0.0s -> FileNotFoundError: [WinError 2] The system cannot find the file specified
+clicksend via npx.cmd (command=npx.cmd)
+  connect: ok after 55.1s -> {"protocolVersion": "2025-06-18", "capabilities": {"tools": {"listChanged": true}}, "serverInfo": {"name": "clicksend", "version": "1.0.0"}}
+  tools/list: 6 -> ['post--v3-sms-send', 'get--v3-search-contacts-lists', 'post--v3-sms-price', 'get--v3-sms-templates', 'get--v3-statistics-sms', 'get--v3-sms-history']
+probe finished

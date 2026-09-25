@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lionel — a governed, general-purpose AI agent</title>
+<meta name="description" content="Lionel is a governed, general-purpose AI agent: deterministic roles, policy-gated tools, multi-provider routing, local-first memory.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0053FD;
+    --blue-dark: #0040C6;
+    --tint: #E8F2FD;
+    --tint-2: #D8E8FB;
+    --ink: #0A0E1A;
+    --ink-soft: #33405A;
+    --muted: #5B6780;
+    --line: #CADFF6;
+    --line-soft: #E2EDFB;
+    --surface: #FFFFFF;
+    --term-bg: #0A0E1A;
+    --term-line: #1B2438;
+    --term-text: #C7D3E8;
+    --term-dim: #6E7C96;
+    --term-green: #4ADE80;
+    --term-blue: #7FA8FF;
+    --term-amber: #F5B942;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --r-sm: 4px;
+    --r: 6px;
+    --r-lg: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, p, figure { margin: 0; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .label--blue { color: var(--blue); }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    background: var(--tint);
+    border-bottom: 1px solid var(--line);
+    padding: 64px 0 56px;
+    text-align: center;
+  }
+
+  .hero__art { overflow-x: auto; }
+
+  .ascii {
+    display: inline-block;
+    margin: 0;
+    color: var(--blue);
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: min(28px, calc((100vw - 40px) / 32));
+    line-height: 1.05;
+    letter-spacing: 0;
+    white-space: pre;
+    text-align: left;
+  }
+
+  .tagline {
+    margin: 28px auto 0;
+    max-width: 520px;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- install widget ---------- */
+
+  .install {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+  }
+
+  .install__box {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+
+  .install__cmd {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink);
+    text-align: left;
+    white-space: nowrap;
+    overflow-x: auto;
+    background: transparent;
+  }
+
+  .copy {
+    flex: 0 0 auto;
+    padding: 0 16px;
+    border: 0;
+    border-left: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--surface);
+    color: var(--blue);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .copy:hover { background: var(--tint); }
+  .copy:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .copy.is-copied { background: #E6F7EE; color: #146C43; }
+
+  .install__note {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---------- sections ---------- */
+
+  .section { padding: 64px 0; }
+
+  .section--tint {
+    background: var(--tint);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section__head { margin-bottom: 28px; }
+
+  .section__title {
+    margin-top: 10px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* ---------- feature cards ---------- */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 20px;
+  }
+
+  .card__label { margin-bottom: 12px; }
+
+  .card__text {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- terminal demo ---------- */
+
+  .terminal { max-width: 880px; margin: 0 auto; }
+
+  .term {
+    background: var(--term-bg);
+    border: 1px solid var(--term-line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+
+  .term__bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--term-line);
+  }
+
+  .term__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 1px;
+    background: var(--term-line);
+  }
+  .term__dot + .term__dot { background: #2A3550; }
+  .term__dot + .term__dot + .term__dot { background: #3A486A; }
+
+  .term__title {
+    margin-left: 8px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--term-dim);
+  }
+
+  .term__body {
+    margin: 0;
+    padding: 16px 18px 18px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: var(--term-text);
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .t-dim { color: var(--term-dim); }
+  .t-blue { color: var(--term-blue); }
+  .t-green { color: var(--term-green); }
+  .t-amber { color: var(--term-amber); }
+  .t-strong { color: #FFFFFF; }
+
+  /* ---------- specs ---------- */
+
+  .specs { max-width: 760px; border-top: 1px solid var(--line); }
+
+  .specs__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: baseline;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .specs__value {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  /* ---------- footer ---------- */
+
+  .footer {
+    border-top: 1px solid var(--line);
+    padding: 28px 0;
+  }
+
+  .footer p { font-size: 13px; color: var(--muted); }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width: 1024px) {
+    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 768px) {
+    .wrap { padding: 0 18px; }
+    .hero { padding: 40px 0 36px; }
+    .tagline { margin-top: 20px; font-size: 17px; }
+    .install { margin-top: 24px; }
+    .section { padding: 44px 0; }
+    .cards { grid-template-columns: 1fr; }
+    .specs__row { grid-template-columns: 1fr; gap: 4px; }
+    .term__body { font-size: 11.5px; }
+    .copy { padding: 0 12px; }
+  }
+</style>
+</head>
+<body>
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero__art">
+<pre class="ascii">██╗       ██╗  ██████╗  ███╗   ██╗ ███████╗ ██╗      
+██║       ██║ ██╔═══██╗ ████╗  ██║ ██╔════╝ ██║      
+██║       ██║ ██║   ██║ ██╔██╗ ██║ █████╗   ██║      
+██║       ██║ ██║   ██║ ██║╚██╗██║ ██╔══╝   ██║      
+███████╗  ██║ ╚██████╔╝ ██║ ╚████║ ███████╗ ███████╗ 
+╚══════╝  ╚═╝  ╚═════╝  ╚═╝  ╚═══╝ ╚══════╝ ╚══════╝ </pre>
+      </div>
+
+      <p class="tagline">A governed, general-purpose AI agent.</p>
+
+      <!-- install widget -->
+      <div class="install">
+        <div class="install__box">
+          <code class="install__cmd" id="installCmd">pip install lionel-agent &amp;&amp; lionel init</code>
+          <button class="copy" id="copyBtn" type="button" aria-label="Copy the install command">Copy</button>
+        </div>
+      </div>
+      <p class="install__note" id="copyStatus" aria-live="polite">Local install · no hosted control plane</p>
+    </div>
+  </header>
+  <!-- ===================== FEATURE CARDS ===================== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="label label--blue">Capabilities</p>
+        <h2 class="section__title">Built to be audited, not trusted.</h2>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <p class="label card__label">Governance</p>
+          <p class="card__text">Every request is normalized, role-scoped, planned, and authorized before a tool can run. Decisions and their outcomes are appended to an audit ledger you can replay.</p>
+        </article>
+
+        <article class="card">
+          <p class="label card__label">Multi-provider routing</p>
+          <p class="card__text">Tasks are ordered across six providers, from hosted endpoints to a local model, per task type. A failed candidate falls through to the next one before the request is surfaced.</p>
+        </article>
+
+        <article class="card">
+          <p class="label card__label">Local-first memory</p>
+          <p class="card__text">Session, working, and persistent memory live in local stores that stay inspectable. Nothing leaves the machine except through a tool call that policy already allowed.</p>
+        </article>
+
+        <article class="card">
+          <p class="label card__label">Modality support</p>
+          <p class="card__text">Text, images, documents, audio, voice, and video are ingested with their metadata intact. Each modality is routed only to a provider that declares support for it.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+  <!-- ===================== TERMINAL DEMO ===================== -->
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="label label--blue">Agent session</p>
+        <h2 class="section__title">A role, a policy gate, a ledger entry.</h2>
+      </div>
+
+      <div class="terminal">
+        <div class="term">
+          <div class="term__bar">
+            <span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span>
+            <span class="term__title">lionel · session 8f3c1d02</span>
+          </div>
+<pre class="term__body"><span class="t-dim">$</span> <span class="t-strong">lionel chat --session 8f3c1d02</span>
+
+<span class="t-dim">you ›</span> summarize the auth findings from the last audit window
+
+<span class="t-blue">lionel ›</span> role=security_auditing_and_grc  policy=read-only  budget=50k
+          plan: query the audit ledger for 24h, scope auth, group by severity
+
+<span class="t-amber">⚙ tool_request</span>  audit.query_ledger {"window":"24h","scope":"auth","limit":50}
+<span class="t-green">◀ result</span>        14 events · 2 high · 5 medium · 7 low · ledger 1e9b4c…c47a
+
+<span class="t-blue">lionel ›</span> two high-severity events: repeated failed MFA enrolments from one ASN,
+          and a token minted outside the approved scope. no remediation ran in
+          this session; the proposed follow-up is queued for confirmation.</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===================== SPECS ===================== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="label label--blue">Specifications</p>
+        <h2 class="section__title">Release snapshot.</h2>
+      </div>
+
+      <div class="specs">
+        <div class="specs__row">
+          <span class="label">Version</span>
+          <span class="specs__value">0.1.0</span>
+        </div>
+        <div class="specs__row">
+          <span class="label">Providers</span>
+          <span class="specs__value">6</span>
+        </div>
+        <div class="specs__row">
+          <span class="label">Roles</span>
+          <span class="specs__value">19</span>
+        </div>
+        <div class="specs__row">
+          <span class="label">Tests</span>
+          <span class="specs__value">261</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="wrap">
+      <p>Lionel is an independent project — no accounts, no telemetry, no hosted control plane.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var cmd = document.getElementById('installCmd');
+      var btn = document.getElementById('copyBtn');
+      var status = document.getElementById('copyStatus');
+      var note = status.textContent;
+      var resetTimer = null;
+
+      function fallbackCopy(text) {
+        var area = document.createElement('textarea');
+        var ok = false;
+        area.value = text;
+        area.setAttribute('readonly', 'readonly');
+        area.style.position = 'fixed';
+        area.style.top = '-1000px';
+        document.body.appendChild(area);
+        area.select();
+        try {
+          ok = document.execCommand('copy');
+        } catch (err) {
+          ok = false;
+        }
+        document.body.removeChild(area);
+        return ok;
+      }
+
+      function flash() {
+        btn.textContent = 'Copied';
+        btn.classList.add('is-copied');
+        status.textContent = 'Install command copied to clipboard';
+        if (resetTimer) {
+          window.clearTimeout(resetTimer);
+        }
+        resetTimer = window.setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('is-copied');
+          status.textContent = note;
+        }, 1800);
+      }
+
+      btn.addEventListener('click', function () {
+        var text = cmd.textContent.trim();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(flash, function () {
+            if (fallbackCopy(text)) {
+              flash();
+            }
+          });
+        } else if (fallbackCopy(text)) {
+          flash();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

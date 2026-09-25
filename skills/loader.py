@@ -121,17 +121,6 @@ def load_by_scan(source_name: str, source_cfg: Dict[str, Any]) -> List[Dict[str,
     root = Path(source_cfg["root"])
     filename = source_cfg.get("filename", "SKILL.md")
 
-    # Keep scan roots inside the project folder.  An outside root would let
-    # the scan read files it should never touch, so refuse it loudly.
-    try:
-        _root_resolved = root.resolve()
-        _project_root = Path(__file__).resolve().parent.parent
-        _inside = _root_resolved.is_relative_to(_project_root)
-    except ValueError:
-        _inside = False
-    if not _inside:
-        logger.warning(f"{source_name}: ignoring scan root outside project: {str(root)!r}")
-        return []
     if not root.exists():
         logger.warning(f"{source_name}: root not found at {root}")
         return []

@@ -1,0 +1,20 @@
+{
+  "_warning": "TRIAL ONLY. Fake data. Replace with real API calls before production.",
+  "users": [
+    { "email": "trial@lionel.local", "password": "letmein", "name": "Trial User" }
+  ],
+  "sessions": [
+    { "id": "sess_a1b2", "model": "llama-3.3-70b", "turns": 4, "tokens": 2340, "status": "ok" },
+    { "id": "sess_c3d4", "model": "gemini-3.6-flash", "turns": 2, "tokens": 890, "status": "ok" },
+    { "id": "sess_e5f6", "model": "llama-3.3-70b", "turns": 7, "tokens": 5120, "status": "error" },
+    { "id": "sess_g7h8", "model": "deepseek-chat", "turns": 1, "tokens": 340, "status": "ok" }
+  ],
+  "providers": [
+    { "name": "Groq", "status": "ok", "latency_ms": 420 },
+    { "name": "Gemini", "status": "ok", "latency_ms": 610 },
+    { "name": "DeepSeek", "status": "degraded", "latency_ms": 2100 },
+    { "name": "LLM7", "status": "ok", "latency_ms": 830 },
+    { "name": "OVH", "status": "disabled", "latency_ms": null },
+    { "name": "Ollama", "status": "offline", "latency_ms": null }
+  ]
+}

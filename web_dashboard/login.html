@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lionel — Sign in</title>
+<link rel="stylesheet" href="/assets/styles.css">
+<script>
+  /* Pre-paint theme hint: the stored choice is applied to <html> before the
+     first paint, then app.js mirrors it onto <body>. */
+  (function () {
+    try {
+      var stored = localStorage.getItem("lionel_theme") === "light" ? "light" : "dark";
+      document.documentElement.classList.add("theme-" + stored);
+    } catch (error) {
+      document.documentElement.classList.add("theme-dark");
+    }
+  })();
+</script>
+</head>
+<body class="theme-dark page-login">
+  <main class="login-wrap">
+    <section class="card login-card">
+      <div class="brand brand--lg">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-word">LIONEL</span>
+      </div>
+
+      <h1 class="login-title">Sign in</h1>
+
+      <p class="login-sub" style="margin: 0 0 1rem; font-size: 0.9rem; color: var(--muted-foreground);">Owner access — Lionel AI Agent</p>
+
+            <p class="banner banner--info" role="status" style="border-color: var(--border); background: var(--card);">
+              Telegram: bot <code>8828084719:***</code> · admin <code>1650192264</code> · online mode: on
+            </p>
+
+      <form class="form" id="login-form" novalidate>
+        <label class="field">
+          <span class="field-label">Email</span>
+          <input id="login-email" name="email" type="email" autocomplete="username"
+                 placeholder="+254712633234@lionel.local" value="+254712633234@lionel.local" required>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input id="login-password" name="password" type="password" autocomplete="current-password"
+                 placeholder="owner" value="owner" required>
+        </label>
+
+        <label class="check" style="display: none;">
+          <input id="login-remember" type="checkbox" checked>
+          <span>Remember me</span>
+        </label>
+
+        <button class="button button--primary button--block" type="submit">Sign in</button>
+
+        <p class="form-error" id="login-error" role="alert" hidden>Invalid credentials.</p>
+      </form>
+
+      <p class="login-hint" style="display: none;">
+        Credentials: <code>+254712633234@lionel.local</code> / <code>owner</code>
+      </p>
+
+      <p class="login-footer">Lionel v0.1.0 — Trial</p>
+    </section>
+  </main>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

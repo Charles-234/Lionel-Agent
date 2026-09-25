@@ -1,7 +1,19 @@
 # Secrets - NEVER commit these
 .env
+.env.*
 *.key
 *.pem
+*.crt
+*.p12
+*.pfx
+credentials*
+secrets*
+private*
+Armando.txt
+*.sqlite3
+*.sqlite
+*.db
+*.db-journal
 
 # Virtual environment
 .venv/

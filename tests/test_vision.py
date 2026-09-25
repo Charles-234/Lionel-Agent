@@ -147,6 +147,30 @@ class OmniRouteVisionTests(unittest.TestCase):
 
 
 class ChatVisionRoutingTests(unittest.TestCase):
+    @patch("agent.chat.extract_attachment")
+    @patch("agent.chat.token_budget")
+    @patch("agent.chat.router.call_with_failover")
+    def test_chat_includes_extracted_document_context(self, mock_router, mock_budget, mock_extract):
+        mock_budget.can_afford.return_value = True
+        mock_extract.return_value.context = "ATTACHMENT: report.pdf\nEXTRACTED CONTENT:\nImportant document text"
+        mock_router.return_value = Completion(
+            text="The document contains important text.",
+            model="gpt-oss-120b",
+            provider="groq",
+            total_tokens=30,
+        )
+
+        resp = chat(
+            user_id=123,
+            user_message="Summarize this document",
+            attachment_bytes=b"%PDF-1.7",
+            attachment_mime_type="application/pdf",
+            attachment_name="report.pdf",
+        )
+
+        self.assertEqual(resp.text, "The document contains important text.")
+        self.assertIn("Important document text", mock_router.call_args[1]["messages"][-1].content)
+
     @patch("agent.chat.token_budget")
     @patch("agent.chat.router.call_with_failover")
     def test_chat_switches_to_vision_task_when_image_present(self, mock_router, mock_budget):
@@ -186,6 +210,29 @@ class ChatVisionRoutingTests(unittest.TestCase):
         self.assertEqual(resp.text, "Hello there!")
         mock_router.assert_called_once()
         self.assertEqual(mock_router.call_args[1]["task_type"], "chat")
+
+    @patch("agent.chat.token_budget")
+    @patch("agent.chat.router.call_with_failover")
+    def test_chat_uses_chat_task_for_non_image_media(self, mock_router, mock_budget):
+        mock_budget.can_afford.return_value = True
+        mock_router.return_value = Completion(
+            text="I can read the file metadata, but I need the actual extracted text for a proper summary.",
+            model="gpt-oss-120b",
+            provider="groq",
+            total_tokens=42,
+        )
+
+        resp = chat(
+            user_id=123,
+            user_message="Read the PDF I have provided",
+            image_bytes=b"%PDF-1.4 fake bytes",
+            image_mime_type="application/pdf",
+        )
+
+        self.assertEqual(resp.text, "I can read the file metadata, but I need the actual extracted text for a proper summary.")
+        mock_router.assert_called_once()
+        self.assertEqual(mock_router.call_args[1]["task_type"], "chat")
+        self.assertIn("application/pdf", mock_router.call_args[1]["messages"][-1].content)
 
 
 class TelegramDoorVisionTests(unittest.TestCase):

@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lionel — Sessions</title>
+<meta name="description" content="Lionel control surface: sessions, providers, toolsets, and audit activity.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0E1A;
+    --sidebar-bg: #080C16;
+    --panel: #0E1424;
+    --panel-2: #121A2E;
+    --border: #1B2438;
+    --border-soft: #151D30;
+    --text: #E4EBF7;
+    --text-dim: #8A97B0;
+    --text-faint: #5C6A85;
+    --blue: #0053FD;
+    --blue-bright: #2D74FF;
+    --green: #34D399;
+    --amber: #FBBF24;
+    --red: #F87171;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --r-sm: 4px;
+    --r: 6px;
+    --sidebar-w: 240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, p { margin: 0; }
+  ul { margin: 0; padding: 0; list-style: none; }
+
+  .mono { font-family: var(--mono); }
+
+  /* ---------- sidebar ---------- */
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    transform: translateX(-100%);
+    transition: transform 160ms ease;
+  }
+
+  .sidebar__brand {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--text);
+  }
+
+  .nav {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 14px 10px;
+  }
+
+  .nav__group {
+    margin: 16px 8px 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .nav__group:first-child { margin-top: 0; }
+
+  .nav__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--r-sm);
+    color: var(--text-dim);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .nav__item:hover { background: var(--panel); color: var(--text); }
+
+  .nav__item.is-active { background: var(--panel); color: #FFFFFF; }
+  .nav__item.is-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--blue);
+  }
+
+  .nav__icon {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    color: var(--text-faint);
+  }
+  .nav__item:hover .nav__icon { color: var(--text-dim); }
+  .nav__item.is-active .nav__icon { color: var(--blue-bright); }
+
+  .sidebar__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .foot__version {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  .foot__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  /* ---------- main shell ---------- */
+
+  .main {
+    min-height: 100vh;
+    margin-left: 0;
+    transition: margin-left 160ms ease;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    padding: 0 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header__title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .header__spacer { flex: 1 1 auto; }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--blue); color: #FFFFFF; }
+  .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+  .btn--icon {
+    width: 34px;
+    padding: 0;
+    color: var(--text-dim);
+  }
+  .btn--icon svg { width: 16px; height: 16px; }
+
+  /* ---------- dots and badges ---------- */
+
+  .dot {
+    flex: 0 0 auto;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-faint);
+  }
+  .dot--green { background: var(--green); }
+  .dot--amber { background: var(--amber); }
+  .dot--red { background: var(--red); }
+  .dot--blue { background: var(--blue-bright); }
+
+  /* ---------- content ---------- */
+
+  .content { padding: 20px; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+  }
+
+  .stat__label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .stat__value {
+    margin-top: 10px;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat__unit {
+    margin-left: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .stack { display: grid; gap: 12px; align-content: start; }
+
+  .activity { margin-top: 12px; }
+
+  /* ---------- panels ---------- */
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+  }
+
+  .panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel__title { font-size: 13px; font-weight: 600; }
+
+  .panel__meta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  /* ---------- table ---------- */
+
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--panel-2); }
+
+  .cell-id { font-family: var(--mono); font-size: 12.5px; color: var(--text); }
+  .cell-model { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  .cell-num {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    text-align: right;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ---------- provider health ---------- */
+
+  .provider {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .provider:last-child { border-bottom: 0; }
+
+  .provider__name { font-size: 13px; color: var(--text); }
+
+  .provider__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ---------- activity ---------- */
+
+  .activity__row {
+    display: grid;
+    grid-template-columns: 78px 86px minmax(0, 1fr);
+    gap: 14px;
+    align-items: baseline;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .activity__row:last-child { border-bottom: 0; }
+
+  .activity__time {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+  }
+
+  .activity__text { font-size: 13px; color: var(--text-dim); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--text-dim);
+  }
+  .badge--blue { border-color: rgba(45, 116, 255, 0.45); color: var(--blue-bright); }
+  .badge--green { border-color: rgba(52, 211, 153, 0.4); color: var(--green); }
+  .badge--amber { border-color: rgba(251, 191, 36, 0.4); color: var(--amber); }
+  .badge--red { border-color: rgba(248, 113, 113, 0.4); color: var(--red); }
+
+  /* ---------- responsive ---------- */
+
+  @media (min-width: 1025px) {
+    .sidebar { transform: none; }
+    body.nav-collapsed .sidebar { transform: translateX(-100%); }
+    .main { margin-left: var(--sidebar-w); }
+    body.nav-collapsed .main { margin-left: 0; }
+    .scrim { display: none; }
+  }
+
+  @media (max-width: 1024px) {
+    body.nav-open .sidebar { transform: translateX(0); }
+    body.nav-open .scrim { opacity: 1; pointer-events: auto; }
+  }
+
+  @media (max-width: 1180px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 560px) {
+    .content { padding: 14px; }
+    .header { padding: 0 14px; }
+    .stats { grid-template-columns: minmax(0, 1fr); }
+    .stat__value { font-size: 24px; }
+    .activity__row { grid-template-columns: 70px minmax(0, 1fr); gap: 10px; }
+    .activity__text { grid-column: 2; }
+  }
+</style>
+</head>
+<body>
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <div class="sidebar__brand">
+      <span class="brand">LIONEL</span>
+    </div>
+
+    <nav class="nav" aria-label="Sections">
+      <p class="nav__group">Operations</p>
+
+      <a class="nav__item is-active" href="#sessions" aria-current="page">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.75" y="2.75" width="12.5" height="8.5" rx="1"/><path d="M5.5 13.25h5M8 11.25v2"/></svg>
+        Sessions
+      </a>
+
+      <a class="nav__item" href="#analytics">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 13.5V9M6.3 13.5V4.5M10.1 13.5V7.5M13.5 13.5V2.5"/></svg>
+        Analytics
+      </a>
+
+      <a class="nav__item" href="#logs">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h10M3 8h10M3 12h6"/></svg>
+        Logs
+      </a>
+
+      <p class="nav__group">Capabilities</p>
+
+      <a class="nav__item" href="#skills">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.7 4.3L14 8l-4.3 1.7L8 14l-1.7-4.3L2 8l4.3-1.7z"/></svg>
+        Skills
+      </a>
+
+      <a class="nav__item" href="#mcp">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4.25" cy="4.25" r="2"/><circle cx="11.75" cy="11.75" r="2"/><path d="M5.9 5.9l4.2 4.2"/></svg>
+        MCP
+      </a>
+
+      <a class="nav__item" href="#toolsets">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="2.4"/><path d="M8 1.75v1.9M8 12.35v1.9M1.75 8h1.9M12.35 8h1.9M3.6 3.6l1.35 1.35M11.05 11.05l1.35 1.35M12.4 3.6l-1.35 1.35M4.95 11.05L3.6 12.4"/></svg>
+        Toolsets
+      </a>
+
+      <p class="nav__group">System</p>
+
+      <a class="nav__item" href="#providers">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="5" rx="1"/><rect x="2.5" y="8.5" width="11" height="5" rx="1"/></svg>
+        Providers
+      </a>
+
+      <a class="nav__item" href="#config">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5h11M2.5 11h11"/><circle cx="6" cy="5" r="1.6"/><circle cx="10.5" cy="11" r="1.6"/></svg>
+        Config
+      </a>
+
+      <a class="nav__item" href="#api-keys">
+        <svg class="nav__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.75" cy="10.25" r="2.75"/><path d="M7.7 8.3l4.3-4.3M10.4 3.1h2.5v2.5"/></svg>
+        API Keys
+      </a>
+    </nav>
+
+    <div class="sidebar__foot">
+      <span class="foot__version">v0.1.0</span>
+      <span class="foot__status"><span class="dot dot--green"></span>Operational</span>
+    </div>
+  </aside>
+
+  <div class="scrim" id="navScrim" aria-hidden="true"></div>
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <header class="header">
+      <button class="btn btn--icon" id="navToggle" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg>
+      </button>
+
+      <h1 class="header__title">Sessions</h1>
+
+      <div class="header__spacer"></div>
+
+      <div class="header__actions">
+        <button class="btn" type="button">Refresh</button>
+        <button class="btn" type="button">New</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- status cards -->
+      <section class="stats" aria-label="Status summary">
+        <article class="stat">
+          <p class="stat__label">Active Sessions</p>
+          <p class="stat__value">12</p>
+        </article>
+
+        <article class="stat">
+          <p class="stat__label">Requests Today</p>
+          <p class="stat__value">4,318</p>
+        </article>
+
+        <article class="stat">
+          <p class="stat__label">Error Rate</p>
+          <p class="stat__value">0.7<span class="stat__unit">%</span></p>
+        </article>
+
+        <article class="stat">
+          <p class="stat__label">Avg Latency</p>
+          <p class="stat__value">842<span class="stat__unit">ms</span></p>
+        </article>
+      </section>
+
+      <div class="grid">
+        <!-- Recent sessions -->
+        <section class="panel" aria-label="Recent sessions">
+          <div class="panel__head">
+            <p class="panel__title">Recent Sessions</p>
+            <p class="panel__meta">last 24h</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Session ID</th>
+                  <th scope="col">Model</th>
+                  <th scope="col">Turns</th>
+                  <th scope="col">Tokens</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="cell-id">8f3c1d02</td>
+                  <td class="cell-model">openai/gpt-oss-120b</td>
+                  <td class="cell-num">14</td>
+                  <td class="cell-num">38.2k</td>
+                  <td><span class="status"><span class="dot dot--blue"></span>Active</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-id">7b21e9a4</td>
+                  <td class="cell-model">gemini-3.6-flash</td>
+                  <td class="cell-num">6</td>
+                  <td class="cell-num">12.7k</td>
+                  <td><span class="status"><span class="dot dot--green"></span>Completed</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-id">5d90c7f1</td>
+                  <td class="cell-model">openai/gpt-oss-20b</td>
+                  <td class="cell-num">22</td>
+                  <td class="cell-num">51.4k</td>
+                  <td><span class="status"><span class="dot dot--green"></span>Completed</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-id">2ae4470b</td>
+                  <td class="cell-model">llama-3.3-70b-instruct</td>
+                  <td class="cell-num">4</td>
+                  <td class="cell-num">6.9k</td>
+                  <td><span class="status"><span class="dot dot--red"></span>Error</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-id">9c05db38</td>
+                  <td class="cell-model">llm7</td>
+                  <td class="cell-num">11</td>
+                  <td class="cell-num">27.3k</td>
+                  <td><span class="status"><span class="dot dot--green"></span>Completed</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-id">41f8a6e0</td>
+                  <td class="cell-model">gemini-3.1-flash-lite</td>
+                  <td class="cell-num">9</td>
+                  <td class="cell-num">19.5k</td>
+                  <td><span class="status"><span class="dot dot--amber"></span>Paused</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Provider health -->
+        <section class="panel" aria-label="Provider health">
+          <div class="panel__head">
+            <p class="panel__title">Provider Health</p>
+            <p class="panel__meta">6 providers</p>
+          </div>
+
+          <div>
+            <div class="provider">
+              <span class="provider__name">Groq</span>
+              <span class="provider__meta"><span class="dot dot--green"></span>Operational</span>
+            </div>
+            <div class="provider">
+              <span class="provider__name">Gemini</span>
+              <span class="provider__meta"><span class="dot dot--green"></span>Operational</span>
+            </div>
+            <div class="provider">
+              <span class="provider__name">DeepSeek</span>
+              <span class="provider__meta"><span class="dot dot--amber"></span>Degraded</span>
+            </div>
+            <div class="provider">
+              <span class="provider__name">LLM7</span>
+              <span class="provider__meta"><span class="dot dot--green"></span>Operational</span>
+            </div>
+            <div class="provider">
+              <span class="provider__name">OVH</span>
+              <span class="provider__meta"><span class="dot dot--red"></span>Unreachable</span>
+            </div>
+            <div class="provider">
+              <span class="provider__name">Ollama</span>
+              <span class="provider__meta"><span class="dot dot--green"></span>Local</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Activity -->
+      <section class="panel activity" aria-label="Activity">
+        <div class="panel__head">
+          <p class="panel__title">Activity</p>
+          <p class="panel__meta">last 20 min</p>
+        </div>
+
+        <div class="activity__row">
+          <span class="activity__time">10:42:18</span>
+          <span class="badge badge--blue">Session</span>
+          <span class="activity__text">sess_8f3c1d02 opened by owner over Telegram</span>
+        </div>
+        <div class="activity__row">
+          <span class="activity__time">10:41:52</span>
+          <span class="badge badge--amber">Policy</span>
+          <span class="activity__text">audit.query_ledger allowed under read-only scope</span>
+        </div>
+        <div class="activity__row">
+          <span class="activity__time">10:38:07</span>
+          <span class="badge badge--green">Memory</span>
+          <span class="activity__text">working-memory checkpoint written for sess_8f3c1d02</span>
+        </div>
+        <div class="activity__row">
+          <span class="activity__time">10:31:44</span>
+          <span class="badge badge--blue">Provider</span>
+          <span class="activity__text">groq returned 429, routed to gemini-3.6-flash</span>
+        </div>
+        <div class="activity__row">
+          <span class="activity__time">10:24:09</span>
+          <span class="badge badge--red">Error</span>
+          <span class="activity__text">deepseek-direct timed out at 30s, marked degraded</span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var body = document.body;
+      var sidebar = document.getElementById('sidebar');
+      var toggle = document.getElementById('navToggle');
+      var scrim = document.getElementById('navScrim');
+      var mq = window.matchMedia('(max-width: 1024px)');
+
+      function syncState() {
+        var open;
+        if (mq.matches) {
+          open = body.classList.contains('nav-open');
+          sidebar.setAttribute('aria-hidden', open ? 'false' : 'true');
+        } else {
+          open = !body.classList.contains('nav-collapsed');
+          sidebar.removeAttribute('aria-hidden');
+        }
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
+      function closeMobileNav() {
+        if (body.classList.contains('nav-open')) {
+          body.classList.remove('nav-open');
+          syncState();
+        }
+      }
+
+      toggle.addEventListener('click', function () {
+        if (mq.matches) {
+          body.classList.toggle('nav-open');
+        } else {
+          body.classList.toggle('nav-collapsed');
+        }
+        syncState();
+      });
+
+      scrim.addEventListener('click', closeMobileNav);
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          closeMobileNav();
+        }
+      });
+
+      var links = document.querySelectorAll('.nav__item');
+      for (var i = 0; i < links.length; i++) {
+        links[i].addEventListener('click', closeMobileNav);
+      }
+
+      function onBreakpointChange(event) {
+        if (!event.matches) {
+          body.classList.remove('nav-open');
+        }
+        syncState();
+      }
+
+      if (mq.addEventListener) {
+        mq.addEventListener('change', onBreakpointChange);
+      } else if (mq.addListener) {
+        mq.addListener(onBreakpointChange);
+      }
+
+      syncState();
+    })();
+  </script>
+</body>
+</html>

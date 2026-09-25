@@ -30,6 +30,10 @@ def cmd_help(args: List[str]) -> CommandResult:
         "/clear                       - clear conversation history",
         "/budget                      - show your token usage today",
         "/status                      - agent status (router, cooldowns)",
+        "/ingest <url>                - fetch and index public TTP skill",
+        "/schedule <sec> <desc>       - queue an autonomous task",
+        "/scheduler_status            - show scheduled task queue",
+        "/run <goal>                  - run an autonomous task",
     ]
     return CommandResult("\n".join(lines))
 
@@ -132,6 +136,120 @@ def cmd_budget(args: List[str]) -> CommandResult:
     return CommandResult("\n".join(lines))
 
 
+def cmd_ingest(args: List[str]) -> CommandResult:
+    if not args:
+        return CommandResult("Usage: /ingest <url>", is_error=True)
+    url = args[0].strip().strip("\"'")
+    from skills.ingest import ingest_url
+    res = ingest_url(url)
+    return CommandResult(res.message, is_error=not res.success)
+
+
+def cmd_schedule(args: List[str]) -> CommandResult:
+    """Queue an autonomous task. Usage: /schedule <seconds> <description>"""
+    if not args or len(args) < 2:
+        return CommandResult(
+            "Usage: /schedule <seconds> <description>\n"
+            "Example: /schedule 60 scan example.com\n"
+            "The description is passed to the agent runtime for planning.",
+            is_error=True,
+        )
+    try:
+        delay = float(args[0])
+    except ValueError:
+        return CommandResult("First argument must be a number of seconds.", is_error=True)
+    description = " ".join(args[1:])
+
+    from agent.scheduler import get_scheduler, schedule_task
+
+    def _run():
+        from tools.executor import execute
+        from tools.policy import AuthorizationScope
+        # Pass through to the recon chain if it looks like a domain scan
+        from chains.recon import run as recon_run
+        import re
+        domain_match = re.search(
+            r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}",
+            description,
+        )
+        if domain_match:
+            domain = domain_match.group(0)
+            scope = AuthorizationScope.for_targets(
+                "system:scheduled",
+                [domain],
+                allow_network=True,
+                max_risk="high",
+                reason=f"Scheduled recon: {domain}",
+            )
+            return recon_run(domain, scope=scope, execution_mode="real")
+        return {"status": "skipped", "reason": "No domain target found in description"}
+
+    task_id = schedule_task(description, _run, delay_seconds=delay)
+    return CommandResult(f"Scheduled task {task_id}: {description} (in {delay}s)")
+
+
+def cmd_scheduler_status(args: List[str]) -> CommandResult:
+    """Show scheduled task status."""
+    from agent.scheduler import scheduler_stats
+    s = scheduler_stats()
+    lines = [
+        "Scheduler status:",
+        f"  Uptime: {s['uptime_seconds']}s",
+        f"  Queued: {s['total_queued']}",
+        f"  Completed: {s['total_completed']}",
+        f"  Failed: {s['total_failed']}",
+        f"  Running now: {s['running_now']}",
+    ]
+    if s["tasks"]:
+        lines.append("")
+        lines.append("Pending tasks:")
+        for t in s["tasks"]:
+            lines.append(
+                f"  {t['task_id']}: {t['description'][:60]} "
+                f"[{t['status']} in {max(0, t['run_at'] - __import__('time').time()):.0f}s]"
+            )
+    else:
+        lines.append("  (no pending tasks)")
+    return CommandResult("\n".join(lines))
+
+
+def cmd_run(args: List[str]) -> CommandResult:
+    """Run an autonomous goal. Usage: /run <goal description>"""
+    if not args:
+        return CommandResult(
+            "Usage: /run <goal description>\n"
+            "Example: /run scan example.com for subdomains and live hosts\n"
+            "The agent will plan, execute, and report results autonomously.",
+            is_error=True,
+        )
+    goal = " ".join(args)
+
+    from agent.autonomous import autonomous_run
+
+    result = autonomous_run(goal, user_id=0)
+
+    lines = [
+        f"Goal: {goal}",
+        f"Status: {'SUCCESS' if result.success else 'FAILED'}",
+        f"Summary: {result.final_summary}",
+        f"Duration: {result.total_duration_ms}ms",
+        f"Steps: {result.steps_succeeded} succeeded, {result.steps_failed} failed (total {result.total_steps})",
+        "",
+        "Turns:",
+    ]
+    for turn in result.turns:
+        lines.append(f"  Turn {turn.turn_index}: {turn.status} — {len(turn.plan)} steps")
+        for step in turn.plan:
+            icon = {"succeeded": "+", "failed": "!", "skipped": "-", "running": "?"}.get(
+                step.status, "?"
+            )
+            lines.append(f"    [{icon}] {step.description[:80]}")
+            if step.error:
+                lines.append(f"        Error: {step.error[:100]}")
+
+    return CommandResult("\n".join(lines))
+
+
 COMMANDS: Dict[str, Callable[[List[str]], CommandResult]] = {
     "help": cmd_help,
     "search": cmd_search,
@@ -143,6 +261,10 @@ COMMANDS: Dict[str, Callable[[List[str]], CommandResult]] = {
     "chat": cmd_chat,
     "clear": cmd_clear,
     "budget": cmd_budget,
+    "ingest": cmd_ingest,
+    "schedule": cmd_schedule,
+    "scheduler_status": cmd_scheduler_status,
+    "run": cmd_run,
 }
 
 

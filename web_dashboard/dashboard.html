@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lionel — Dashboard</title>
+<link rel="stylesheet" href="/assets/styles.css">
+<script>
+  (function () {
+    try {
+      var stored = localStorage.getItem("lionel_theme") === "light" ? "light" : "dark";
+      document.documentElement.classList.add("theme-" + stored);
+    } catch (error) {
+      document.documentElement.classList.add("theme-dark");
+    }
+  })();
+</script>
+</head>
+<body class="theme-dark page-app">
+
+  <!-- Line icons: one inline sprite, no external deps, no CDN, no icon font -->
+  <svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.6 10.6 14 14"/></symbol>
+      <symbol id="i-sun"   viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.6v1.8M8 12.6v1.8M1.6 8h1.8M12.6 8h1.8M3.5 3.5l1.3 1.3M11.2 11.2l1.3 1.3M12.5 3.5l-1.3 1.3M4.8 11.2l-1.3 1.3"/></symbol>
+      <symbol id="i-moon"  viewBox="0 0 16 16"><path d="M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8Z"/></symbol>
+      <symbol id="i-grid"  viewBox="0 0 16 16"><rect x="2.4" y="2.4" width="4.9" height="4.9" rx="1.1"/><rect x="8.7" y="2.4" width="4.9" height="4.9" rx="1.1"/><rect x="2.4" y="8.7" width="4.9" height="4.9" rx="1.1"/><rect x="8.7" y="8.7" width="4.9" height="4.9" rx="1.1"/></symbol>
+      <symbol id="i-layers" viewBox="0 0 16 16"><path d="M8 2.4 14 5.3 8 8.3 2 5.3Z"/><path d="M2.6 8.4 8 11.2l5.4-2.8"/><path d="M2.6 11 8 13.8 13.4 11"/></symbol>
+      <symbol id="i-terminal" viewBox="0 0 16 16"><rect x="2.2" y="3.2" width="11.6" height="9.6" rx="1.4"/><path d="M5.2 6.6 7 8.4l-1.8 1.8M8.8 10.4h3"/></symbol>
+      <symbol id="i-wallet" viewBox="0 0 16 16"><rect x="2.2" y="3.6" width="11.6" height="8.8" rx="1.4"/><path d="M2.2 6.6h11.6M10.4 9.6h1.8"/></symbol>
+      <symbol id="i-hash"  viewBox="0 0 16 16"><path d="M6.6 2.6 5.2 13.4M10.9 2.6 9.5 13.4M2.6 6h10.8M2.6 10.2h10.8"/></symbol>
+      <symbol id="i-bars"  viewBox="0 0 16 16"><path d="M3.4 13V9.4M6.9 13V5.6M10.4 13V8.2M13.9 13v-2.6"/></symbol>
+      <symbol id="i-sparkle" viewBox="0 0 16 16"><path d="M6.4 2.4 7.6 5.6 10.8 6.8 7.6 8 6.4 11.2 5.2 8 2 6.8 5.2 5.6Z"/><path d="M12.2 10.2l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6Z"/></symbol>
+      <symbol id="i-plug"  viewBox="0 0 16 16"><path d="M6.2 2.4v3.4M9.8 2.4v3.4"/><path d="M4.6 5.8h6.8v2.4a3.4 3.4 0 0 1-6.8 0Z"/><path d="M8 11.6v2"/></symbol>
+      <symbol id="i-database" viewBox="0 0 16 16"><ellipse cx="8" cy="4.1" rx="5" ry="2.1"/><path d="M3 4.1v7.8c0 1.2 2.2 2.1 5 2.1s5-.9 5-2.1V4.1"/><path d="M3 8c0 1.2 2.2 2.1 5 2.1s5-.9 5-2.1"/></symbol>
+      <symbol id="i-server"  viewBox="0 0 16 16"><rect x="2.4" y="2.6" width="11.2" height="4.4" rx="1.2"/><rect x="2.4" y="9" width="11.2" height="4.4" rx="1.2"/><path d="M4.9 4.8h.01M4.9 11.2h.01"/></symbol>
+      <symbol id="i-route"  viewBox="0 0 16 16"><circle cx="4.2" cy="4.2" r="1.8"/><circle cx="11.8" cy="11.8" r="1.8"/><path d="M4.2 6v3.3a2.5 2.5 0 0 0 2.5 2.5h3.3"/></symbol>
+      <symbol id="i-shield"  viewBox="0 0 16 16"><path d="M8 2.3 13 4.3v3.9c0 3-2.2 4.6-5 5.5-2.8-.9-5-2.5-5-5.5V4.3Z"/><path d="M6.2 7.6 7.6 9l2.4-2.4"/></symbol>
+      <symbol id="i-gear"   viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.2"/><path d="M8 2.3v1.6M8 12.1v1.6M2.3 8h1.6M12.1 8h1.6M4 4l1.15 1.15M10.85 10.85 12 12M12 4l-1.15 1.15M5.15 10.85 4 12"/></symbol>
+      <symbol id="i-signout" viewBox="0 0 16 16"><path d="M9.6 2.6H4.4A1.8 1.8 0 0 0 2.6 4.4v7.2a1.8 1.8 0 0 0 1.8 1.8h5.2"/><path d="M7.4 8h6M11.2 5.9 13.4 8l-2.2 2.1"/></symbol>
+      <symbol id="i-trash"  viewBox="0 0 16 16"><path d="M2.8 5.2h10.4M5.2 5.2V3.6a1.6 1.6 0 0 1 1.6-1.6h3.2a1.6 1.6 0 0 1 1.6 1.6v1.6M4.4 5.4l.8 8a1.2 1.2 0 0 0 1.2 1.2h1.6a1.2 1.2 0 0 0 1.2-1.2l.6-6.6"/></symbol>
+      <symbol id="i-check"  viewBox="0 0 16 16"><path d="M3 8.4 6.6 12l5-5.6"/></symbol>
+      <symbol id="i-alert"  viewBox="0 0 16 16"><path d="M8 2.4 13.6 13H2.4Z"/><path d="M8 6v4M8 11.2v.4"/></symbol>
+      <symbol id="i-logs"   viewBox="0 0 16 16"><rect x="2.2" y="2.2" width="11.6" height="11.6" rx="2"/><path d="M4.6 6h6.8M4.6 8.6h4.8M4.6 11.2h3.2"/></symbol>
+      <symbol id="i-chart-line" viewBox="0 0 16 16"><path d="M1.6 13.2 3.8 9.8 5.8 11.2 7.8 6 9.8 8.6 12 5 14.4 7.2"/></symbol>
+      <symbol id="i-rocket" viewBox="0 0 16 16"><path d="M6.4 13.4 8 2.6M10.8 10.4 8 2.6M8 2.6l-1.6 1.6M8 2.6l1.6 1.6M5 9.6h1.8a6 6 0 0 1 6 6 6 6 0 0 1-6 6H5"/></symbol>
+      <symbol id="i-clock"   viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.4v3.2l2.4 1.6"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 16 16"><path d="M13.6 2.3 2.4 8l11.2 5.7-1.7 1.7L1.1 9.3 13.6 2.3Z"/></symbol>
+      <symbol id="i-key"    viewBox="0 0 16 16"><circle cx="6.4" cy="6.4" r="2.8"/><path d="M6.4 3.9V2.2a3.4 3.4 0 0 0-6.8 0v1.7a1.2 1.2 0 0 0 1.2 1.2h.5a1.2 1.2 0 0 0 1.2-1.2V2.2a1.4 1.4 0 0 1 2.8 0v1.7a1.2 1.2 0 0 0 1.2 1.2h.5a1.2 1.2 0 0 0 1.2-1.2V2.2a3.4 3.4 0 0 0-3.4-3.4"/><path d="M2.2 13.8h11.6"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-word">LIONEL</span>
+      </div>
+
+      <div class="sidebar-search">
+        <svg class="sidebar-search-icon" aria-hidden="true"><use href="#i-search"></use></svg>
+        <input id="nav-filter" type="search" placeholder="Filter navigation" aria-label="Filter navigation">
+      </div>
+
+      <nav class="nav" id="nav" aria-label="Primary">
+        <div class="nav-group">
+          <p class="nav-group-label">Monitoring</p>
+          <a class="nav-item is-active" href="#overview" data-nav="Overview">
+            <svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg>
+            <span class="nav-text"><span class="nav-label">Overview</span><span class="nav-sub">Live status</span></span>
+          </a>
+          <a class="nav-item" href="#sessions" data-nav="Sessions">
+            <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
+            <span class="nav-text"><span class="nav-label">Sessions</span><span class="nav-sub">Recent runs</span></span>
+          </a>
+          <a class="nav-item" href="#logs" data-nav="Logs">
+            <svg class="icon" aria-hidden="true"><use href="#i-terminal"></use></svg>
+            <span class="nav-text"><span class="nav-label">Logs</span><span class="nav-sub">Audit trail</span></span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-label">Cost</p>
+          <a class="nav-item" href="#budget" data-nav="Budget">
+            <svg class="icon" aria-hidden="true"><use href="#i-wallet"></use></svg>
+            <span class="nav-text"><span class="nav-label">Budget</span><span class="nav-sub">Spend limits</span></span>
+          </a>
+          <a class="nav-item" href="#tokens" data-nav="Tokens">
+            <svg class="icon" aria-hidden="true"><use href="#i-hash"></use></svg>
+            <span class="nav-text"><span class="nav-label">Tokens</span><span class="nav-sub">Consumption</span></span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-label">Agentic Features</p>
+          <a class="nav-item" href="#skills" data-nav="Skills">
+            <svg class="icon" aria-hidden="true"><use href="#i-sparkle"></use></svg>
+            <span class="nav-text"><span class="nav-label">Skills</span><span class="nav-sub">Loaded skills</span></span>
+          </a>
+          <a class="nav-item" href="#mcp" data-nav="MCP">
+            <svg class="icon" aria-hidden="true"><use href="#i-plug"></use></svg>
+            <span class="nav-text"><span class="nav-label">MCP</span><span class="nav-sub">Tool servers</span></span>
+          </a>
+          <a class="nav-item" href="#memory" data-nav="Memory">
+            <svg class="icon" aria-hidden="true"><use href="#i-database"></use></svg>
+            <span class="nav-text"><span class="nav-label">Memory</span><span class="nav-sub">Stores</span></span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-label">Configuration</p>
+          <a class="nav-item" href="#providers" data-nav="Providers">
+            <svg class="icon" aria-hidden="true"><use href="#i-server"></use></svg>
+            <span class="nav-text"><span class="nav-label">Providers</span><span class="nav-sub">API keys</span></span>
+          </a>
+          <a class="nav-item" href="#routing" data-nav="Routing">
+            <svg class="icon" aria-hidden="true"><use href="#i-route"></use></svg>
+            <span class="nav-text"><span class="nav-label">Routing</span><span class="nav-sub">Model choice</span></span>
+          </a>
+          <a class="nav-item" href="#security" data-nav="Security">
+            <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+            <span class="nav-text"><span class="nav-label">Security</span><span class="nav-sub">Policy</span></span>
+          </a>
+          <a class="nav-item" href="#settings" data-nav="Settings">
+            <svg class="icon" aria-hidden="true"><use href="#i-gear"></use></svg>
+            <span class="nav-text"><span class="nav-label">Settings</span><span class="nav-sub">Workspace</span></span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="sidebar-meta">
+          <span class="sidebar-version" id="sidebar-version">—</span>
+          <button class="button button--ghost" id="sign-out" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-signout"></use></svg>
+            <span>Sign out</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== Main ===== -->
+    <div class="main">
+      <header class="topbar">
+        <div>
+          <p class="topbar-eyebrow" id="topbar-eyebrow">Lionel workspace</p>
+          <h1 id="page-title">Overview</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="search">
+            <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+            <input id="content-search" type="search" placeholder="Search sessions, providers"
+                   aria-label="Search sessions and providers">
+          </div>
+
+          <button class="icon-button" id="theme-toggle" type="button" aria-pressed="true" title="Toggle theme">
+            <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+            <svg class="icon icon-sun"  aria-hidden="true"><use href="#i-sun"></use></svg>
+          </button>
+
+          <div class="user">
+            <span class="avatar" id="avatar">?</span>
+            <span class="user-meta">
+              <span class="user-name" id="user-name">Guest</span>
+              <span class="user-mail" id="user-email">—</span>
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main class="content" id="content-area">
+        <!-- Banner injected by app.js on login state -->
+        <div id="banner-slot"></div>
+
+        <!-- ========== Overview view ========== -->
+        <section class="view-panel is-active" id="view-overview" data-view="overview">
+          <section class="cards" aria-label="Status summary">
+            <article class="card stat">
+              <p class="stat-label">Active Sessions</p>
+              <p class="stat-value" id="stat-sessions">—</p>
+              <p class="stat-note" id="stat-sessions-note">of 20 concurrent slots</p>
+            </article>
+            <article class="card stat">
+              <p class="stat-label">Requests Today</p>
+              <p class="stat-value" id="stat-requests">—</p>
+              <p class="stat-note" id="stat-requests-note">today</p>
+            </article>
+            <article class="card stat">
+              <p class="stat-label">Tokens Used</p>
+              <p class="stat-value" id="stat-tokens">—</p>
+              <p class="stat-note" id="stat-tokens-note">today</p>
+            </article>
+            <article class="card stat">
+              <p class="stat-label">Error Rate</p>
+              <p class="stat-value" id="stat-errors">—</p>
+              <p class="stat-note" id="stat-errors-note">last 24 hours</p>
+            </article>
+          </section>
+
+          <section class="grid grid--split">
+            <article class="card">
+              <header class="card-head">
+                <h2>Recent Sessions</h2>
+                <span class="card-note" id="sessions-count">—</span>
+              </header>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Session ID</th>
+                    <th scope="col">Model</th>
+                    <th scope="col" class="num">Turns</th>
+                    <th scope="col" class="num">Tokens</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="sessions-body"></tbody>
+              </table>
+              <p class="empty" id="sessions-empty" hidden>No sessions match the current search.</p>
+            </article>
+
+            <article class="card">
+              <header class="card-head">
+                <h2>Provider Health</h2>
+                <span class="card-note" id="providers-count">—</span>
+              </header>
+              <ul class="providers" id="providers-list"></ul>
+              <p class="empty" id="providers-empty" hidden>No providers match the current search.</p>
+            </article>
+          </section>
+
+          <section class="grid grid--split">
+            <article class="card">
+              <header class="card-head">
+                <h2>Token Usage</h2>
+                <span class="card-note" id="token-chart-note">loading…</span>
+              </header>
+              <div class="chart" id="token-chart"></div>
+            </article>
+
+            <article class="card">
+              <header class="card-head">
+                <h2>Requests per Hour</h2>
+                <span class="card-note" id="requests-chart-note">loading…</span>
+              </header>
+              <div class="chart" id="requests-chart"></div>
+            </article>
+          </section>
+        </section>
+
+        <!-- ========== Sessions view ========== -->
+        <section class="view-panel" id="view-sessions" data-view="sessions">
+          <p class="view-description">Every chat session the agent has handled, with model, turn count, token consumption, and current status.</p>
+          <article class="card">
+            <header class="card-head">
+              <h2>All Sessions</h2>
+              <span class="card-note" id="sessions-full-count">—</span>
+            </header>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Session ID</th>
+                  <th scope="col">Model</th>
+                  <th scope="col">Started</th>
+                  <th scope="col" class="num">Turns</th>
+                  <th scope="col" class="num">Prompt</th>
+                  <th scope="col" class="num">Completion</th>
+                  <th scope="col" class="num">Tokens</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody id="sessions-full-body"></tbody>
+            </table>
+            <p class="empty" id="sessions-full-empty" hidden>No sessions on record yet.</p>
+          </article>
+        </section>
+
+        <!-- ========== Logs view ========== -->
+        <section class="view-panel" id="view-logs" data-view="logs">
+          <p class="view-description">Audit trail of tools and commands the agent ran. Each row records the time, event, tool, payload detail, and result.</p>
+          <article class="card">
+            <header class="card-head">
+              <h2>Audit Log</h2>
+              <span class="card-note" id="logs-count">—</span>
+            </header>
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th scope="col">Time</th>
+                  <th scope="col">Event</th>
+                  <th scope="col">Tool</th>
+                  <th scope="col">Detail</th>
+                  <th scope="col">Result</th>
+                </tr>
+              </thead>
+              <tbody id="logs-body"></tbody>
+            </table>
+            <p class="empty" id="logs-empty" hidden>No audit entries yet.</p>
+          </article>
+        </section>
+
+        <!-- ========== Budget view ========== -->
+        <section class="view-panel" id="view-budget" data-view="budget">
+          <p class="view-description">Spend limits and live usage against each budget line. Bars fill as the agent consumes tokens and spend.</p>
+          <div class="budget-grid" id="budget-grid"></div>
+        </section>
+
+        <!-- ========== Tokens view ========== -->
+        <section class="view-panel" id="view-tokens" data-view="tokens">
+          <p class="view-description">Prompt vs completion token consumption over the last 24 hours, plus a per-model breakdown.</p>
+          <div class="grid grid--split">
+            <article class="card">
+              <header class="card-head">
+                <h2>Token Usage by Hour</h2>
+                <span class="card-note" id="tokens-chart-note">loading…</span>
+              </header>
+              <div class="chart" id="tokens-hourly-chart"></div>
+            </article>
+            <article class="card">
+              <header class="card-head">
+                <h2>By Provider</h2>
+                <span class="card-note" id="tokens-provider-note">loading…</span>
+              </header>
+              <div class="chart" id="tokens-provider-chart"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ========== Skills view ========== -->
+        <section class="view-panel" id="view-skills" data-view="skills">
+          <p class="view-description">Every skill loaded into the agent. Use the filter to search by name or tag.</p>
+          <div class="card">
+            <header class="card-head">
+              <h2>Loaded Skills</h2>
+              <span class="card-note" id="skills-count">—</span>
+            </header>
+            <ul class="skills-list" id="skills-list"></ul>
+            <p class="empty" id="skills-empty" hidden>No skills loaded yet.</p>
+            <input id="skills-filter" type="search" placeholder="Filter skills by name or tag" class="skills-filter" aria-label="Filter skills" style="margin-top:12px">
+          </div>
+        </section>
+
+        <!-- ========== Provider Rankings view ========== -->
+        <section class="view-panel" id="view-rankings" data-view="rankings">
+          <p class="view-description">Latency and reliability ranking across all configured providers.</p>
+          <article class="card">
+            <header class="card-head">
+              <h2>Provider Rankings</h2>
+              <span class="card-note" id="rankings-count">—</span>
+            </header>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Rank</th>
+                  <th scope="col">Provider</th>
+                  <th scope="col" class="num">Latency (ms)</th>
+                  <th scope="col" class="num">Success</th>
+                  <th scope="col">Model</th>
+                </tr>
+              </thead>
+              <tbody id="rankings-body"></tbody>
+            </table>
+            <p class="empty" id="rankings-empty" hidden>No ranking data yet.</p>
+          </article>
+        </section>
+
+        <!-- ========== Stub views (no data yet) ========== -->
+        <section class="view-panel" id="view-mcp" data-view="mcp">
+          <p class="view-description">Model Context Protocol tool servers the agent can reach.</p>
+          <p class="empty">MCP tool server inventory coming soon.</p>
+        </section>
+
+        <section class="view-panel" id="view-memory" data-view="memory">
+          <p class="view-description">Memory stores the agent reads and writes across sessions.</p>
+          <p class="empty">Memory store inventory coming soon.</p>
+        </section>
+
+        <section class="view-panel" id="view-routing" data-view="routing">
+          <p class="view-description">Current routing strategy and model selection policy.</p>
+          <p class="empty">Routing configuration coming soon.</p>
+        </section>
+
+        <section class="view-panel" id="view-security" data-view="security">
+          <p class="view-description">Safety policy: rate limits, provider allowlists, and tool sandboxing.</p>
+          <p class="empty">Security policy coming soon.</p>
+        </section>
+
+        <section class="view-panel" id="view-settings" data-view="settings">
+          <p class="view-description">Workspace settings, theme, and profile.</p>
+          <p class="empty">Settings panel coming soon.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+{
+  "amass": {
+    "binary": null,
+    "capabilities": [
+      "reconnaissance"
+    ],
+    "category": "reconnaissance",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Planned integration: Amass. Not executable until an adapter is implemented and verified.",
+    "enabled": false,
+    "execution_modes": [
+      "real"
+    ],
+    "filesystem_access": false,
+    "id": "amass",
+    "implemented": false,
+    "name": "Amass",
+    "network_access": false,
+    "provenance": "planned_external_integration",
+    "requires_authorized_target": false,
+    "risk_level": "high",
+    "supports_simulation": false
+  },
+  "ghidra": {
+    "binary": null,
+    "capabilities": [
+      "reverse_engineering"
+    ],
+    "category": "reverse_engineering",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Planned integration: Ghidra. Not executable until an adapter is implemented and verified.",
+    "enabled": false,
+    "execution_modes": [
+      "real"
+    ],
+    "filesystem_access": false,
+    "id": "ghidra",
+    "implemented": false,
+    "name": "Ghidra",
+    "network_access": false,
+    "provenance": "planned_external_integration",
+    "requires_authorized_target": false,
+    "risk_level": "high",
+    "supports_simulation": false
+  },
+  "httpx": {
+    "binary": "httpx",
+    "capabilities": [
+      "reconnaissance",
+      "networking"
+    ],
+    "category": "reconnaissance",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "HTTP service probing through the existing governed adapter.",
+    "enabled": true,
+    "execution_modes": [
+      "real",
+      "simulation"
+    ],
+    "filesystem_access": false,
+    "id": "httpx",
+    "implemented": true,
+    "name": "httpx",
+    "network_access": true,
+    "provenance": "existing_project_adapter",
+    "requires_authorized_target": true,
+    "risk_level": "high",
+    "supports_simulation": true
+  },
+  "nmap": {
+    "binary": "nmap",
+    "capabilities": [
+      "networking",
+      "reconnaissance",
+      "security_testing"
+    ],
+    "category": "networking",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Network discovery and service enumeration.",
+    "enabled": true,
+    "execution_modes": [
+      "real",
+      "simulation"
+    ],
+    "filesystem_access": false,
+    "id": "nmap",
+    "implemented": true,
+    "name": "Nmap",
+    "network_access": true,
+    "provenance": "environment_detected",
+    "requires_authorized_target": true,
+    "risk_level": "high",
+    "supports_simulation": true
+  },
+  "nuclei": {
+    "binary": "nuclei",
+    "capabilities": [
+      "security_testing",
+      "reconnaissance"
+    ],
+    "category": "security_testing",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Template-based security testing through the existing governed adapter.",
+    "enabled": true,
+    "execution_modes": [
+      "real",
+      "simulation"
+    ],
+    "filesystem_access": false,
+    "id": "nuclei",
+    "implemented": true,
+    "name": "Nuclei",
+    "network_access": true,
+    "provenance": "existing_project_adapter",
+    "requires_authorized_target": true,
+    "risk_level": "high",
+    "supports_simulation": true
+  },
+  "recon_ng": {
+    "binary": null,
+    "capabilities": [
+      "reconnaissance"
+    ],
+    "category": "reconnaissance",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Planned integration: recon-ng. Not executable until an adapter is implemented and verified.",
+    "enabled": false,
+    "execution_modes": [
+      "real"
+    ],
+    "filesystem_access": false,
+    "id": "recon_ng",
+    "implemented": false,
+    "name": "recon-ng",
+    "network_access": false,
+    "provenance": "planned_external_integration",
+    "requires_authorized_target": false,
+    "risk_level": "high",
+    "supports_simulation": false
+  },
+  "spiderfoot": {
+    "binary": null,
+    "capabilities": [
+      "reconnaissance"
+    ],
+    "category": "reconnaissance",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Planned integration: SpiderFoot. Not executable until an adapter is implemented and verified.",
+    "enabled": false,
+    "execution_modes": [
+      "real"
+    ],
+    "filesystem_access": false,
+    "id": "spiderfoot",
+    "implemented": false,
+    "name": "SpiderFoot",
+    "network_access": false,
+    "provenance": "planned_external_integration",
+    "requires_authorized_target": false,
+    "risk_level": "high",
+    "supports_simulation": false
+  },
+  "subfinder": {
+    "binary": "subfinder",
+    "capabilities": [
+      "reconnaissance"
+    ],
+    "category": "reconnaissance",
+    "confirmation_required": false,
+    "credentials_required": false,
+    "description": "Subdomain discovery through the existing governed adapter.",
+    "enabled": true,
+    "execution_modes": [
+      "real",
+      "simulation"
+    ],
+    "filesystem_access": false,
+    "id": "subfinder",
+    "implemented": true,
+    "name": "Subfinder",
+    "network_access": true,
+    "provenance": "existing_project_adapter",
+    "requires_authorized_target": true,
+    "risk_level": "high",
+    "supports_simulation": true
+  }
+}

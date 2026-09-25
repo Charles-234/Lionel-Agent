@@ -76,7 +76,7 @@ class CapabilityGateTests(unittest.TestCase):
 
     def test_registry_contains_only_governed_current_adapters(self):
         names = {item["name"] for item in get_registry().list()}
-        self.assertEqual(names, {"subfinder", "httpx", "nuclei", "web_fetch"})
+        self.assertEqual(names, {"subfinder", "httpx", "nuclei", "web_fetch", "ip_lookup"})
 
 
 if __name__ == "__main__":

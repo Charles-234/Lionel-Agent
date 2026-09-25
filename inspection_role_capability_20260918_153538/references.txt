@@ -1,0 +1,780 @@
+﻿=== ROLE/CAPABILITY/TOOL/POLICY/AUDIT REFERENCES ===
+
+--- RoleRegistry ---
+
+--- CapabilityRegistry ---
+
+--- ToolRegistry ---
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:5:from tools.registry import ToolRegistry
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:11:registry = ToolRegistry()
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:18:registry = ToolRegistry()
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:28:registry = ToolRegistry()
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:40:registry = ToolRegistry()
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:16:class ToolRegistry:
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:66:_default_registry: Optional[ToolRegistry] = None
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:69:def get_registry() -> ToolRegistry:
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:75:_default_registry = ToolRegistry()
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:36:class ToolRegistry:
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:73:_default_registry: Optional[ToolRegistry] = None
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:74:def get_registry() -> ToolRegistry:
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:80:_default_registry = ToolRegistry()
+lionel_policy_capability_gate_batch\tools\registry.py:16:class ToolRegistry:
+lionel_policy_capability_gate_batch\tools\registry.py:90:_default_registry: Optional[ToolRegistry] = None
+lionel_policy_capability_gate_batch\tools\registry.py:93:def get_registry() -> ToolRegistry:
+lionel_policy_capability_gate_batch\tools\registry.py:100:_default_registry = ToolRegistry()
+lionel_tool_registry_batch\tests\test_tool_registry.py:7:class ToolRegistryTests(unittest.TestCase):
+tests\test_governed_tools.py:5:from tools.registry import ToolRegistry
+tests\test_governed_tools.py:11:registry = ToolRegistry()
+tests\test_governed_tools.py:18:registry = ToolRegistry()
+tests\test_governed_tools.py:28:registry = ToolRegistry()
+tests\test_governed_tools.py:40:registry = ToolRegistry()
+tests\test_tool_registry.py:7:class ToolRegistryTests(unittest.TestCase):
+tools\registry.py:16:class ToolRegistry:
+tools\registry.py:90:_default_registry: Optional[ToolRegistry] = None
+tools\registry.py:93:def get_registry() -> ToolRegistry:
+tools\registry.py:100:_default_registry = ToolRegistry()
+
+--- PolicyGateway ---
+lionel_architecture_v1\lionel_architecture_v1\tools\base.py:35:"""Base contract. Policy metadata is declarative; PolicyGateway enforces it."""
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:42:class PolicyGateway:
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:6:from tools.policy import AuthorizationScope, PolicyDecision, PolicyGateway
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:17:def __init__(self, policy: Optional[PolicyGateway] = None):
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:18:self.policy = policy or PolicyGateway()
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:28:from tools.policy import AuthorizationScope, PolicyGateway
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:37:def __init__(self, policy: Optional[PolicyGateway] = None):
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:38:self.policy = policy or PolicyGateway()
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:3:from tools.policy import AuthorizationScope, PolicyGateway
+lionel_policy_capability_gate_batch\tools\policy.py:41:class PolicyGateway:
+lionel_policy_capability_gate_batch\tools\registry.py:6:from tools.policy import AuthorizationScope, PolicyGateway
+lionel_policy_capability_gate_batch\tools\registry.py:17:def __init__(self, policy: Optional[PolicyGateway] = None):
+lionel_policy_capability_gate_batch\tools\registry.py:18:self.policy = policy or PolicyGateway()
+lionel_tool_registry_batch\tools_registry\base.py:4:PolicyGateway remains the enforcement point.
+tests\test_capability_gate.py:3:from tools.policy import AuthorizationScope, PolicyGateway
+tools\base.py:35:"""Base contract. Policy metadata is declarative; PolicyGateway enforces it."""
+tools\policy.py:41:class PolicyGateway:
+tools\registry.py:6:from tools.policy import AuthorizationScope, PolicyGateway
+tools\registry.py:17:def __init__(self, policy: Optional[PolicyGateway] = None):
+tools\registry.py:18:self.policy = policy or PolicyGateway()
+tools_registry\base.py:4:PolicyGateway remains the enforcement point.
+
+--- AuthorizationScope ---
+chains\recon.py:7:from tools.policy import AuthorizationScope
+chains\recon.py:42:scope: Optional[AuthorizationScope] = None,
+chains\recon.py:104:scope: Optional[AuthorizationScope] = None,
+lionel_architecture_v1\lionel_architecture_v1\chains\recon.py:7:from tools.policy import AuthorizationScope
+lionel_architecture_v1\lionel_architecture_v1\chains\recon.py:50:scope: Optional[AuthorizationScope] = None,
+lionel_architecture_v1\lionel_architecture_v1\chains\recon.py:104:scope: Optional[AuthorizationScope] = None,
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:4:from tools.policy import AuthorizationScope
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:30:scope = AuthorizationScope.for_targets(
+lionel_architecture_v1\lionel_architecture_v1\tests\test_governed_tools.py:42:scope = AuthorizationScope.for_targets(
+lionel_architecture_v1\lionel_architecture_v1\tools\executor.py:4:from tools.policy import AuthorizationScope
+lionel_architecture_v1\lionel_architecture_v1\tools\executor.py:12:scope: Optional[AuthorizationScope] = None,
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:19:class AuthorizationScope:
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:30:def for_targets(cls, principal: str, targets: Iterable[str], **kwargs: Any) -> "AuthorizationScope":
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:49:scope: Optional[AuthorizationScope] = None,
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:67:scope = AuthorizationScope(principal="system", allow_network=False, allow_filesystem=False)
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:6:from tools.policy import AuthorizationScope, PolicyDecision, PolicyGateway
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:45:scope: Optional[AuthorizationScope] = None,
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:28:from tools.policy import AuthorizationScope, PolicyGateway
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:54:def authorize_and_run(self, name: str, arguments: Dict[str, Any], *, scope: Optional[AuthorizationScope] = None, execution_mode: str = "real", confirmed: bool = False) -> ToolResult:
+lionel_policy_capability_gate_batch\chains\recon.py:7:from tools.policy import AuthorizationScope
+lionel_policy_capability_gate_batch\chains\recon.py:42:scope: Optional[AuthorizationScope] = None,
+lionel_policy_capability_gate_batch\chains\recon.py:104:scope: Optional[AuthorizationScope] = None,
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:3:from tools.policy import AuthorizationScope, PolicyGateway
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:10:self.scope = AuthorizationScope.for_targets(
+lionel_policy_capability_gate_batch\tools\executor.py:5:from tools.policy import AuthorizationScope
+lionel_policy_capability_gate_batch\tools\executor.py:14:scope: Optional[AuthorizationScope] = None,
+lionel_policy_capability_gate_batch\tools\policy.py:15:class AuthorizationScope:
+lionel_policy_capability_gate_batch\tools\policy.py:25:def for_targets(cls, principal: str, targets: Iterable[str], **kwargs: Any) -> "AuthorizationScope":
+lionel_policy_capability_gate_batch\tools\policy.py:48:scope: Optional[AuthorizationScope] = None,
+lionel_policy_capability_gate_batch\tools\policy.py:86:scope = AuthorizationScope(principal="system")
+lionel_policy_capability_gate_batch\tools\registry.py:6:from tools.policy import AuthorizationScope, PolicyGateway
+lionel_policy_capability_gate_batch\tools\registry.py:46:scope: Optional[AuthorizationScope] = None,
+tests\test_capability_gate.py:3:from tools.policy import AuthorizationScope, PolicyGateway
+tests\test_capability_gate.py:10:self.scope = AuthorizationScope.for_targets(
+tests\test_governed_tools.py:4:from tools.policy import AuthorizationScope
+tests\test_governed_tools.py:30:scope = AuthorizationScope.for_targets(
+tests\test_governed_tools.py:42:scope = AuthorizationScope.for_targets(
+tools\policy.py:15:class AuthorizationScope:
+tools\policy.py:25:def for_targets(cls, principal: str, targets: Iterable[str], **kwargs: Any) -> "AuthorizationScope":
+tools\policy.py:48:scope: Optional[AuthorizationScope] = None,
+tools\policy.py:86:scope = AuthorizationScope(principal="system")
+tools\registry.py:6:from tools.policy import AuthorizationScope, PolicyGateway
+tools\registry.py:46:scope: Optional[AuthorizationScope] = None,
+
+--- PolicyDecision ---
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:35:class PolicyDecision:
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:52:) -> PolicyDecision:
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:54:return PolicyDecision(False, "Unsupported execution mode.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:58:return PolicyDecision(False, "Tool does not support simulation mode.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:59:return PolicyDecision(True, "Simulation explicitly requested.", metadata={"verified": False})
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:62:return PolicyDecision(False, "Tool declares an invalid risk level.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:66:return PolicyDecision(False, "Explicit authorization scope is required for this tool.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:70:return PolicyDecision(False, "Tool risk exceeds the authorization scope.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:72:return PolicyDecision(False, "Network access is not allowed by the authorization scope.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:74:return PolicyDecision(False, "Filesystem access is not allowed by the authorization scope.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:76:return PolicyDecision(False, "Explicit confirmation is required before execution.", requires_confirmation=True)
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:81:return PolicyDecision(False, "No target was supplied for an authorized-target tool.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:83:return PolicyDecision(False, "Requested target is outside the supplied authorization scope.")
+lionel_architecture_v1\lionel_architecture_v1\tools\policy.py:85:return PolicyDecision(True, "Allowed by policy.", metadata={"principal": scope.principal, "verified": True})
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:6:from tools.policy import AuthorizationScope, PolicyDecision, PolicyGateway
+lionel_policy_capability_gate_batch\tools\policy.py:34:class PolicyDecision:
+lionel_policy_capability_gate_batch\tools\policy.py:52:) -> PolicyDecision:
+lionel_policy_capability_gate_batch\tools\policy.py:54:return PolicyDecision(False, "Unsupported execution mode.")
+lionel_policy_capability_gate_batch\tools\policy.py:59:return PolicyDecision(False, "Capability context is required for this tool.")
+lionel_policy_capability_gate_batch\tools\policy.py:65:return PolicyDecision(False, "Tool is not registered in the capability registry.")
+lionel_policy_capability_gate_batch\tools\policy.py:67:return PolicyDecision(False, "Tool is not enabled for execution.")
+lionel_policy_capability_gate_batch\tools\policy.py:69:return PolicyDecision(False, "Requested capability is not authorized for this tool.")
+lionel_policy_capability_gate_batch\tools\policy.py:73:return PolicyDecision(False, "Tool does not support simulation mode.")
+lionel_policy_capability_gate_batch\tools\policy.py:74:return PolicyDecision(
+lionel_policy_capability_gate_batch\tools\policy.py:81:return PolicyDecision(False, "Tool declares an invalid risk level.")
+lionel_policy_capability_gate_batch\tools\policy.py:85:return PolicyDecision(False, "Explicit authorization scope is required for this tool.")
+lionel_policy_capability_gate_batch\tools\policy.py:89:return PolicyDecision(False, "Tool risk exceeds the authorization scope.")
+lionel_policy_capability_gate_batch\tools\policy.py:91:return PolicyDecision(False, "Network access is not allowed by the authorization scope.")
+lionel_policy_capability_gate_batch\tools\policy.py:93:return PolicyDecision(False, "Filesystem access is not allowed by the authorization scope.")
+lionel_policy_capability_gate_batch\tools\policy.py:95:return PolicyDecision(
+lionel_policy_capability_gate_batch\tools\policy.py:104:return PolicyDecision(False, "No target was supplied for an authorized-target tool.")
+lionel_policy_capability_gate_batch\tools\policy.py:106:return PolicyDecision(False, "Requested target is outside the supplied authorization scope.")
+lionel_policy_capability_gate_batch\tools\policy.py:108:return PolicyDecision(
+tools\policy.py:34:class PolicyDecision:
+tools\policy.py:52:) -> PolicyDecision:
+tools\policy.py:54:return PolicyDecision(False, "Unsupported execution mode.")
+tools\policy.py:59:return PolicyDecision(False, "Capability context is required for this tool.")
+tools\policy.py:65:return PolicyDecision(False, "Tool is not registered in the capability registry.")
+tools\policy.py:67:return PolicyDecision(False, "Tool is not enabled for execution.")
+tools\policy.py:69:return PolicyDecision(False, "Requested capability is not authorized for this tool.")
+tools\policy.py:73:return PolicyDecision(False, "Tool does not support simulation mode.")
+tools\policy.py:74:return PolicyDecision(
+tools\policy.py:81:return PolicyDecision(False, "Tool declares an invalid risk level.")
+tools\policy.py:85:return PolicyDecision(False, "Explicit authorization scope is required for this tool.")
+tools\policy.py:89:return PolicyDecision(False, "Tool risk exceeds the authorization scope.")
+tools\policy.py:91:return PolicyDecision(False, "Network access is not allowed by the authorization scope.")
+tools\policy.py:93:return PolicyDecision(False, "Filesystem access is not allowed by the authorization scope.")
+tools\policy.py:95:return PolicyDecision(
+tools\policy.py:104:return PolicyDecision(False, "No target was supplied for an authorized-target tool.")
+tools\policy.py:106:return PolicyDecision(False, "Requested target is outside the supplied authorization scope.")
+tools\policy.py:108:return PolicyDecision(
+
+--- ToolResult ---
+lionel_architecture_v1\lionel_architecture_v1\tools\base.py:10:class ToolResult:
+lionel_architecture_v1\lionel_architecture_v1\tools\base.py:55:def run(self, **kwargs: Any) -> ToolResult:
+lionel_architecture_v1\lionel_architecture_v1\tools\executor.py:3:from tools.base import ToolResult
+lionel_architecture_v1\lionel_architecture_v1\tools\executor.py:15:) -> ToolResult:
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:52:from tools.base import ToolResult
+lionel_architecture_v1\lionel_architecture_v1\tools\registry.py:53:return ToolResult(
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:27:from tools.base import Tool, ToolResult
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:54:def authorize_and_run(self, name: str, arguments: Dict[str, Any], *, scope: Optional[AuthorizationScope] = None, execution_mode: str = "real", confirmed: bool = False) -> ToolResult:
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:58:return ToolResult(False, error=decision.reason, tool_name=name, execution_mode=execution_mode, verified=False)
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:63:return ToolResult(False, error="Simulation implementation is unavailable.", tool_name=name, execution_mode="simulation", verified=False)
+lionel_governance_batch\lionel_governance_batch\install_lionel_governance.py:106:s = s[:start] + '        if not self.available():\n            return ToolResult(success=False, error="Required tool binary is unavailable.", tool_name=self.name, execution_mode="real", verified=False)\n' + s[end:]
+lionel_policy_capability_gate_batch\tools\executor.py:4:from tools.base import ToolResult
+lionel_policy_capability_gate_batch\tools\executor.py:17:) -> ToolResult:
+lionel_policy_capability_gate_batch\tools\registry.py:5:from tools.base import Tool, ToolResult
+lionel_policy_capability_gate_batch\tools\registry.py:49:) -> ToolResult:
+lionel_policy_capability_gate_batch\tools\registry.py:60:return ToolResult(
+lionel_policy_capability_gate_batch\tools\registry.py:72:return ToolResult(
+tools\base.py:10:class ToolResult:
+tools\base.py:55:def run(self, **kwargs: Any) -> ToolResult:
+tools\mocks.py:11:from tools.base import Tool, ToolResult
+tools\mocks.py:57:def run(self, domain: str, limit: int = 8, **kwargs: Any) -> ToolResult:
+tools\mocks.py:64:return ToolResult(
+tools\mocks.py:93:def run(self, hosts: List[str], **kwargs: Any) -> ToolResult:
+tools\mocks.py:109:return ToolResult(
+tools\mocks.py:139:def run(self, targets: List[str], severity: str = "medium,high,critical", **kwargs: Any) -> ToolResult:
+tools\mocks.py:155:return ToolResult(
+tools\registry.py:5:from tools.base import Tool, ToolResult
+tools\registry.py:49:) -> ToolResult:
+tools\registry.py:60:return ToolResult(
+tools\registry.py:72:return ToolResult(
+tools\recon\httpx.py:13:from tools.base import Tool, ToolResult
+tools\recon\httpx.py:46:def run(self, hosts: List[str], timeout_sec: int = 120, **kwargs: Any) -> ToolResult:
+tools\recon\httpx.py:48:return ToolResult(success=True, data={"live_hosts": [], "count": 0},
+tools\recon\httpx.py:52:return ToolResult(success=False, error="Required tool binary is unavailable.", tool_name=self.name, execution_mode="real", verified=False)
+tools\recon\httpx.py:63:return ToolResult(success=False, error=f"timeout after {timeout_sec}s",
+tools\recon\httpx.py:67:return ToolResult(success=False, error=str(e),
+tools\recon\httpx.py:88:return ToolResult(
+tools\recon\nuclei.py:13:from tools.base import Tool, ToolResult
+tools\recon\nuclei.py:49:timeout_sec: int = 300, **kwargs: Any) -> ToolResult:
+tools\recon\nuclei.py:51:return ToolResult(success=True, data={"findings": [], "count": 0},
+tools\recon\nuclei.py:55:return ToolResult(success=False, error="Required tool binary is unavailable.", tool_name=self.name, execution_mode="real", verified=False)
+tools\recon\nuclei.py:69:return ToolResult(success=False, error=f"timeout after {timeout_sec}s",
+tools\recon\nuclei.py:73:return ToolResult(success=False, error=str(e),
+tools\recon\nuclei.py:94:return ToolResult(
+tools\recon\subfinder.py:13:from tools.base import Tool, ToolResult
+tools\recon\subfinder.py:47:def run(self, domain: str, silent: bool = True, timeout_sec: int = 120, **kwargs: Any) -> ToolResult:
+tools\recon\subfinder.py:49:return ToolResult(success=False, error="Required tool binary is unavailable.", tool_name=self.name, execution_mode="real", verified=False)
+tools\recon\subfinder.py:59:return ToolResult(success=False, error=f"timeout after {timeout_sec}s",
+tools\recon\subfinder.py:63:return ToolResult(success=False, error=str(e),
+tools\recon\subfinder.py:68:return ToolResult(
+
+--- audit ---
+config.py:62:"Security Auditing & GRC",
+agent_registry\capabilities.py:37:"security_audit": Capability("security_audit", "Security Audit", "security", "Security control and configuration assessment.", ["text", "document", "structured_data"], True, False, "high"),
+agent_registry\roles.py:97:"security_grc", "Security Auditing & GRC",
+agent_registry\roles.py:98:"Security controls, governance, risk, compliance, and audit support.",
+agent_registry\roles.py:99:["security", "grc"], ["security_audit", "document_processing"],
+audit\integration.py:1:"""Small audit helpers used at Lionel's tool execution boundary."""
+audit\integration.py:9:from audit.ledger import AuditEvent, AuditLedger
+audit\integration.py:23:ledger: AuditLedger,
+audit\integration.py:32:ledger.record(AuditEvent(
+audit\integration.py:44:ledger: AuditLedger,
+audit\integration.py:59:ledger.record(AuditEvent(
+audit\ledger.py:1:"""Compact, secret-safe SQLite audit ledger for Lionel."""
+audit\ledger.py:47:class AuditEvent:
+audit\ledger.py:70:class AuditLedger:
+audit\ledger.py:80:def __init__(self, db_path: str = "logs/lionel_audit.sqlite3") -> None:
+audit\ledger.py:100:CREATE TABLE IF NOT EXISTS audit_events (
+audit\ledger.py:120:"CREATE INDEX IF NOT EXISTS idx_audit_timestamp "
+audit\ledger.py:121:"ON audit_events(timestamp_utc)"
+audit\ledger.py:124:"CREATE INDEX IF NOT EXISTS idx_audit_event_type "
+audit\ledger.py:125:"ON audit_events(event_type)"
+audit\ledger.py:128:"CREATE INDEX IF NOT EXISTS idx_audit_session "
+audit\ledger.py:129:"ON audit_events(session_id)"
+audit\ledger.py:132:"CREATE INDEX IF NOT EXISTS idx_audit_tool "
+audit\ledger.py:133:"ON audit_events(tool)"
+audit\ledger.py:137:def record(self, event: AuditEvent) -> str:
+audit\ledger.py:145:INSERT INTO audit_events (
+audit\ledger.py:169:"SELECT * FROM audit_events ORDER BY id DESC LIMIT ?",
+audit\__init__.py:1:"""Lionel compact, secret-safe audit ledger."""
+audit\__init__.py:2:from .ledger import AuditEvent, AuditLedger
+lionel_audit_integration_batch\install_lionel_audit_integration.py:12:"audit_integration_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+lionel_audit_integration_batch\install_lionel_audit_integration.py:16:PROJECT / "audit" / "ledger.py",
+lionel_audit_integration_batch\install_lionel_audit_integration.py:18:ROOT / "audit" / "integration.py",
+lionel_audit_integration_batch\install_lionel_audit_integration.py:20:ROOT / "tests" / "test_audit_integration.py",
+lionel_audit_integration_batch\install_lionel_audit_integration.py:28:for rel in ("tools/executor.py", "tests/test_audit_integration.py"):
+lionel_audit_integration_batch\install_lionel_audit_integration.py:35:(PROJECT / "audit").mkdir(exist_ok=True)
+lionel_audit_integration_batch\install_lionel_audit_integration.py:38:shutil.copy2(ROOT / "audit" / "integration.py", PROJECT / "audit" / "integration.py")
+lionel_audit_integration_batch\install_lionel_audit_integration.py:40:shutil.copy2(ROOT / "tests" / "test_audit_integration.py", PROJECT / "tests" / "test_audit_integration.py")
+lionel_audit_integration_batch\install_lionel_audit_integration.py:44:str(PROJECT / "audit" / "integration.py"),
+lionel_audit_integration_batch\install_lionel_audit_integration.py:46:str(PROJECT / "tests" / "test_audit_integration.py")],
+lionel_audit_integration_batch\install_lionel_audit_integration.py:50:[sys.executable, "-m", "unittest", "tests.test_audit_integration", "-v"],
+lionel_audit_integration_batch\install_lionel_audit_integration.py:54:print("SUCCESS: Lionel audit integration installed and tests passed.")
+lionel_audit_integration_batch\audit\integration.py:1:"""Small audit helpers used at Lionel's tool execution boundary."""
+lionel_audit_integration_batch\audit\integration.py:9:from audit.ledger import AuditEvent, AuditLedger
+lionel_audit_integration_batch\audit\integration.py:23:ledger: AuditLedger,
+lionel_audit_integration_batch\audit\integration.py:32:ledger.record(AuditEvent(
+lionel_audit_integration_batch\audit\integration.py:44:ledger: AuditLedger,
+lionel_audit_integration_batch\audit\integration.py:59:ledger.record(AuditEvent(
+lionel_audit_integration_batch\tests\test_audit_integration.py:6:from audit.ledger import AuditLedger
+lionel_audit_integration_batch\tests\test_audit_integration.py:7:from audit.integration import record_request, record_result
+lionel_audit_integration_batch\tests\test_audit_integration.py:17:class AuditIntegrationTests(unittest.TestCase):
+lionel_audit_integration_batch\tests\test_audit_integration.py:20:self.db = Path(self.tmp.name) / "audit.sqlite3"
+lionel_audit_integration_batch\tests\test_audit_integration.py:21:self.ledger = AuditLedger(str(self.db))
+lionel_audit_integration_batch\tests\test_audit_integration.py:53:def test_raw_target_and_secret_do_not_enter_audit(self):
+lionel_audit_integration_batch\tests\test_audit_integration.py:63:self.ledger.record(__import__("audit.ledger", fromlist=["AuditEvent"]).AuditEvent(
+lionel_audit_integration_batch\tests\test_audit_integration.py:71:def test_audit_failure_does_not_reach_tool(self):
+lionel_audit_integration_batch\tests\test_audit_integration.py:77:with patch("tools.executor.get_audit_ledger", side_effect=RuntimeError("ledger unavailable")):
+lionel_audit_integration_batch\tools\executor.py:1:"""Single governed execution facade with compact audit integration."""
+lionel_audit_integration_batch\tools\executor.py:8:from audit.integration import record_request, record_result
+lionel_audit_integration_batch\tools\executor.py:9:from audit.ledger import AuditLedger
+lionel_audit_integration_batch\tools\executor.py:13:_LEDGER: Optional[AuditLedger] = None
+lionel_audit_integration_batch\tools\executor.py:16:def get_audit_ledger() -> AuditLedger:
+lionel_audit_integration_batch\tools\executor.py:19:_LEDGER = AuditLedger()
+lionel_audit_integration_batch\tools\executor.py:44:"""Authorize and execute one tool, recording only compact audit events.
+lionel_audit_integration_batch\tools\executor.py:46:The policy/registry remain the enforcement boundary. Audit failures must
+lionel_audit_integration_batch\tools\executor.py:50:ledger = get_audit_ledger()
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:13:"audit_ledger_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:17:ROOT / "audit" / "__init__.py",
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:18:ROOT / "audit" / "ledger.py",
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:19:ROOT / "tests" / "test_audit_ledger.py",
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:27:for rel in ("audit/__init__.py", "audit/ledger.py", "tests/test_audit_ledger.py"):
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:35:(PROJECT / "audit").mkdir(exist_ok=True)
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:38:shutil.copy2(ROOT / "audit" / "__init__.py", PROJECT / "audit" / "__init__.py")
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:39:shutil.copy2(ROOT / "audit" / "ledger.py", PROJECT / "audit" / "ledger.py")
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:40:shutil.copy2(ROOT / "tests" / "test_audit_ledger.py", PROJECT / "tests" / "test_audit_ledger.py")
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:43:PROJECT / "audit" / "ledger.py",
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:44:PROJECT / "tests" / "test_audit_ledger.py",
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:51:[sys.executable, "-m", "unittest", "tests.test_audit_ledger", "-v"],
+lionel_audit_ledger_batch\install_lionel_audit_ledger.py:55:print("SUCCESS: Lionel SQLite audit ledger installed and tests passed.")
+lionel_audit_ledger_batch\audit\ledger.py:1:"""Compact, secret-safe SQLite audit ledger for Lionel."""
+lionel_audit_ledger_batch\audit\ledger.py:47:class AuditEvent:
+lionel_audit_ledger_batch\audit\ledger.py:70:class AuditLedger:
+lionel_audit_ledger_batch\audit\ledger.py:80:def __init__(self, db_path: str = "logs/lionel_audit.sqlite3") -> None:
+lionel_audit_ledger_batch\audit\ledger.py:100:CREATE TABLE IF NOT EXISTS audit_events (
+lionel_audit_ledger_batch\audit\ledger.py:120:"CREATE INDEX IF NOT EXISTS idx_audit_timestamp "
+lionel_audit_ledger_batch\audit\ledger.py:121:"ON audit_events(timestamp_utc)"
+lionel_audit_ledger_batch\audit\ledger.py:124:"CREATE INDEX IF NOT EXISTS idx_audit_event_type "
+lionel_audit_ledger_batch\audit\ledger.py:125:"ON audit_events(event_type)"
+lionel_audit_ledger_batch\audit\ledger.py:128:"CREATE INDEX IF NOT EXISTS idx_audit_session "
+lionel_audit_ledger_batch\audit\ledger.py:129:"ON audit_events(session_id)"
+lionel_audit_ledger_batch\audit\ledger.py:132:"CREATE INDEX IF NOT EXISTS idx_audit_tool "
+lionel_audit_ledger_batch\audit\ledger.py:133:"ON audit_events(tool)"
+lionel_audit_ledger_batch\audit\ledger.py:137:def record(self, event: AuditEvent) -> str:
+lionel_audit_ledger_batch\audit\ledger.py:145:INSERT INTO audit_events (
+lionel_audit_ledger_batch\audit\ledger.py:169:"SELECT * FROM audit_events ORDER BY id DESC LIMIT ?",
+lionel_audit_ledger_batch\audit\__init__.py:1:"""Lionel compact, secret-safe audit ledger."""
+lionel_audit_ledger_batch\audit\__init__.py:2:from .ledger import AuditEvent, AuditLedger
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:5:from audit.ledger import AuditEvent, AuditLedger
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:8:class AuditLedgerTests(unittest.TestCase):
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:11:self.db = Path(self.tmp.name) / "audit.sqlite3"
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:12:self.ledger = AuditLedger(str(self.db))
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:18:event_id = self.ledger.record(AuditEvent(
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:38:self.ledger.record(AuditEvent(
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:47:self.ledger.record(AuditEvent(
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:61:self.ledger.record(AuditEvent(
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:71:self.ledger.record(AuditEvent(event_type="HANDLE_TEST"))
+lionel_role_capability_batch\agent_registry\capabilities.py:37:"security_audit": Capability("security_audit", "Security Audit", "security", "Security control and configuration assessment.", ["text", "document", "structured_data"], True, False, "high"),
+lionel_role_capability_batch\agent_registry\roles.py:97:"security_grc", "Security Auditing & GRC",
+lionel_role_capability_batch\agent_registry\roles.py:98:"Security controls, governance, risk, compliance, and audit support.",
+lionel_role_capability_batch\agent_registry\roles.py:99:["security", "grc"], ["security_audit", "document_processing"],
+tests\test_audit_integration.py:6:from audit.ledger import AuditLedger
+tests\test_audit_integration.py:7:from audit.integration import record_request, record_result
+tests\test_audit_integration.py:17:class AuditIntegrationTests(unittest.TestCase):
+tests\test_audit_integration.py:20:self.db = Path(self.tmp.name) / "audit.sqlite3"
+tests\test_audit_integration.py:21:self.ledger = AuditLedger(str(self.db))
+tests\test_audit_integration.py:53:def test_raw_target_and_secret_do_not_enter_audit(self):
+tests\test_audit_integration.py:63:self.ledger.record(__import__("audit.ledger", fromlist=["AuditEvent"]).AuditEvent(
+tests\test_audit_integration.py:71:def test_audit_failure_does_not_reach_tool(self):
+tests\test_audit_integration.py:77:with patch("tools.executor.get_audit_ledger", side_effect=RuntimeError("ledger unavailable")):
+tests\test_audit_ledger.py:5:from audit.ledger import AuditEvent, AuditLedger
+tests\test_audit_ledger.py:8:class AuditLedgerTests(unittest.TestCase):
+tests\test_audit_ledger.py:11:self.db = Path(self.tmp.name) / "audit.sqlite3"
+tests\test_audit_ledger.py:12:self.ledger = AuditLedger(str(self.db))
+tests\test_audit_ledger.py:18:event_id = self.ledger.record(AuditEvent(
+tests\test_audit_ledger.py:38:self.ledger.record(AuditEvent(
+tests\test_audit_ledger.py:47:self.ledger.record(AuditEvent(
+tests\test_audit_ledger.py:61:self.ledger.record(AuditEvent(
+tests\test_audit_ledger.py:71:self.ledger.record(AuditEvent(event_type="HANDLE_TEST"))
+tools\executor.py:1:"""Single governed execution facade with compact audit integration."""
+tools\executor.py:8:from audit.integration import record_request, record_result
+tools\executor.py:9:from audit.ledger import AuditLedger
+tools\executor.py:13:_LEDGER: Optional[AuditLedger] = None
+tools\executor.py:16:def get_audit_ledger() -> AuditLedger:
+tools\executor.py:19:_LEDGER = AuditLedger()
+tools\executor.py:44:"""Authorize and execute one tool, recording only compact audit events.
+tools\executor.py:46:The policy/registry remain the enforcement boundary. Audit failures must
+tools\executor.py:50:ledger = get_audit_ledger()
+
+--- execute_tool ---
+
+--- execute ---
+audit\ledger.py:91:conn.execute("PRAGMA journal_mode=DELETE")
+audit\ledger.py:92:conn.execute("PRAGMA busy_timeout=5000")
+audit\ledger.py:99:conn.execute("""
+audit\ledger.py:119:conn.execute(
+audit\ledger.py:123:conn.execute(
+audit\ledger.py:127:conn.execute(
+audit\ledger.py:131:conn.execute(
+audit\ledger.py:144:conn.execute("""
+audit\ledger.py:168:rows = conn.execute(
+chains\recon.py:6:from tools.executor import execute
+chains\recon.py:48:sf = execute("subfinder", {"domain": domain},
+chains\recon.py:64:hx = execute("httpx", {"hosts": result.subdomains},
+chains\recon.py:82:nc = execute("nuclei", {"targets": targets},
+lionel_architecture_v1\lionel_architecture_v1\chains\recon.py:6:from tools.executor import execute
+lionel_architecture_v1\lionel_architecture_v1\chains\recon.py:57:sf = execute("subfinder", {"domain": domain}, scope=scope, execution_mode=execution_mode, confirmed=confirmed)
+lionel_architecture_v1\lionel_architecture_v1\chains\recon.py:69:hx = execute("httpx", {"hosts": result.subdomains}, scope=scope, execution_mode=execution_mode, confirmed=confirmed)
+lionel_architecture_v1\lionel_architecture_v1\chains\recon.py:83:nc = execute("nuclei", {"targets": targets}, scope=scope, execution_mode=execution_mode, confirmed=confirmed)
+lionel_architecture_v1\lionel_architecture_v1\tools\executor.py:8:def execute(
+lionel_audit_integration_batch\tests\test_audit_integration.py:72:from tools.executor import execute
+lionel_audit_integration_batch\tests\test_audit_integration.py:79:execute(Tool(), {}, capability="test", execution_mode="simulation")
+lionel_audit_integration_batch\tools\executor.py:33:def execute(
+lionel_audit_integration_batch\tools\executor.py:44:"""Authorize and execute one tool, recording only compact audit events.
+lionel_audit_ledger_batch\audit\ledger.py:91:conn.execute("PRAGMA journal_mode=DELETE")
+lionel_audit_ledger_batch\audit\ledger.py:92:conn.execute("PRAGMA busy_timeout=5000")
+lionel_audit_ledger_batch\audit\ledger.py:99:conn.execute("""
+lionel_audit_ledger_batch\audit\ledger.py:119:conn.execute(
+lionel_audit_ledger_batch\audit\ledger.py:123:conn.execute(
+lionel_audit_ledger_batch\audit\ledger.py:127:conn.execute(
+lionel_audit_ledger_batch\audit\ledger.py:131:conn.execute(
+lionel_audit_ledger_batch\audit\ledger.py:144:conn.execute("""
+lionel_audit_ledger_batch\audit\ledger.py:168:rows = conn.execute(
+lionel_policy_capability_gate_batch\chains\recon.py:6:from tools.executor import execute
+lionel_policy_capability_gate_batch\chains\recon.py:48:sf = execute("subfinder", {"domain": domain},
+lionel_policy_capability_gate_batch\chains\recon.py:64:hx = execute("httpx", {"hosts": result.subdomains},
+lionel_policy_capability_gate_batch\chains\recon.py:82:nc = execute("nuclei", {"targets": targets},
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:5:from tools.executor import execute
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:19:result = execute(
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:30:result = execute(
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:40:result = execute(
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:49:result = execute(
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:59:result = execute(
+lionel_policy_capability_gate_batch\tools\executor.py:9:def execute(
+lionel_tool_registry_batch\tests\test_tool_registry.py:27:def test_planned_tools_cannot_execute(self):
+tests\test_audit_integration.py:72:from tools.executor import execute
+tests\test_audit_integration.py:79:execute(Tool(), {}, capability="test", execution_mode="simulation")
+tests\test_capability_gate.py:5:from tools.executor import execute
+tests\test_capability_gate.py:19:result = execute(
+tests\test_capability_gate.py:30:result = execute(
+tests\test_capability_gate.py:40:result = execute(
+tests\test_capability_gate.py:49:result = execute(
+tests\test_capability_gate.py:59:result = execute(
+tests\test_tool_registry.py:27:def test_planned_tools_cannot_execute(self):
+tools\executor.py:33:def execute(
+tools\executor.py:44:"""Authorize and execute one tool, recording only compact audit events.
+
+--- role ---
+config.py:3:Single source of truth for env vars, roles, and routing.
+config.py:48:# The 19 Roles
+config.py:49:ROLES = [
+config.py:183:print(f"Roles: {len(ROLES)}")
+test_chat.py:58:print(f"[{t.role}] {t.content[:100]}")
+test_omniroute.py:37:Message(role="system", content="You are Lionel. Reply in one sentence."),
+test_omniroute.py:38:Message(role="user", content="Introduce yourself in one sentence."),
+test_router.py:17:Message(role="user", content="In one sentence, what is the capital of France?"),
+agent\chat.py:110:messages: List[Message] = [Message(role="system", content=system_prompt)]
+agent\chat.py:114:if turn.role in ("user", "assistant"):
+agent\chat.py:115:messages.append(Message(role=turn.role, content=turn.content))
+agent\chat.py:117:messages.append(Message(role="user", content=user_message))
+agent\prompts.py:6:- Role list (from config.ROLES)
+agent\prompts.py:60:You have expertise across {role_count} domains:
+agent\prompts.py:61:{role_list}
+agent\prompts.py:76:You have expertise across {role_count} domains:
+agent\prompts.py:77:{role_list}
+agent\prompts.py:94:roles = "\n".join(f"  {i+1}. {r}" for i, r in enumerate(config.ROLES))
+agent\prompts.py:96:role_count=len(config.ROLES),
+agent\prompts.py:97:role_list=roles,
+agent\prompts.py:106:roles = "\n".join(f"  {i+1}. {r}" for i, r in enumerate(config.ROLES))
+agent\prompts.py:116:role_count=len(config.ROLES),
+agent\prompts.py:117:role_list=roles,
+agent_registry\roles.py:1:"""Lionel role registry.
+agent_registry\roles.py:3:Roles are declarative metadata used by the runtime for routing and policy.
+agent_registry\roles.py:12:class Role:
+agent_registry\roles.py:23:ROLES: Dict[str, Role] = {
+agent_registry\roles.py:24:"offensive_security": Role(
+agent_registry\roles.py:30:"digital_forensics_soc": Role(
+agent_registry\roles.py:36:"software_ai_architecture": Role(
+agent_registry\roles.py:42:"ui_ux_3d_web": Role(
+agent_registry\roles.py:48:"data_engineering_analytics": Role(
+agent_registry\roles.py:54:"cloud_infrastructure_security": Role(
+agent_registry\roles.py:60:"optical_fiber_network": Role(
+agent_registry\roles.py:66:"growth_business": Role(
+agent_registry\roles.py:72:"content_copywriting": Role(
+agent_registry\roles.py:78:"virtual_assistant": Role(
+agent_registry\roles.py:84:"financial_analysis": Role(
+agent_registry\roles.py:90:"legal_compliance": Role(
+agent_registry\roles.py:96:"security_gRC": Role(
+agent_registry\roles.py:102:"test_automation": Role(
+agent_registry\roles.py:108:"deployment_operations": Role(
+agent_registry\roles.py:114:"malware_reverse_engineering": Role(
+agent_registry\roles.py:120:"threat_intelligence": Role(
+agent_registry\roles.py:126:"malware_defensive_evasion": Role(
+agent_registry\roles.py:132:"enterprise_incident_response": Role(
+agent_registry\roles.py:141:def get_role(role_id: str) -> Role:
+agent_registry\roles.py:142:return ROLES[role_id]
+agent_registry\roles.py:145:def list_roles() -> List[Role]:
+agent_registry\roles.py:146:return list(ROLES.values())
+agent_registry\__init__.py:2:from .roles import ROLES, Role, get_role, list_roles
+agent_registry\__init__.py:6:"ROLES", "Role", "get_role", "list_roles",
+audit\integration.py:26:role: Optional[str],
+audit\integration.py:35:role=role,
+audit\integration.py:48:role: Optional[str],
+audit\integration.py:62:role=role,
+audit\ledger.py:50:role: Optional[str] = None
+audit\ledger.py:106:role TEXT,
+audit\ledger.py:147:role, capability, tool, policy_decision,
+audit\ledger.py:153:data["session_id"], data["role"], data["capability"],
+lionel_audit_integration_batch\audit\integration.py:26:role: Optional[str],
+lionel_audit_integration_batch\audit\integration.py:35:role=role,
+lionel_audit_integration_batch\audit\integration.py:48:role: Optional[str],
+lionel_audit_integration_batch\audit\integration.py:62:role=role,
+lionel_audit_integration_batch\tests\test_audit_integration.py:30:role="offensive_security",
+lionel_audit_integration_batch\tests\test_audit_integration.py:40:role="offensive_security",
+lionel_audit_integration_batch\tests\test_audit_integration.py:57:role="test",
+lionel_audit_integration_batch\tools\executor.py:42:role: Optional[str] = None,
+lionel_audit_integration_batch\tools\executor.py:55:role=role,
+lionel_audit_integration_batch\tools\executor.py:76:role=role,
+lionel_audit_ledger_batch\audit\ledger.py:50:role: Optional[str] = None
+lionel_audit_ledger_batch\audit\ledger.py:106:role TEXT,
+lionel_audit_ledger_batch\audit\ledger.py:147:role, capability, tool, policy_decision,
+lionel_audit_ledger_batch\audit\ledger.py:153:data["session_id"], data["role"], data["capability"],
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:21:role="offensive_security",
+lionel_role_capability_batch\install_lionel_role_capability.py:16:backup = PROJECT / "backups" / f"role_capability_{stamp}"
+lionel_role_capability_batch\install_lionel_role_capability.py:19:for rel in ("agent_registry", "tests/test_role_capability.py"):
+lionel_role_capability_batch\install_lionel_role_capability.py:29:for rel in ("agent_registry", "tests/test_role_capability.py"):
+lionel_role_capability_batch\install_lionel_role_capability.py:42:str(PROJECT / "agent_registry" / "roles.py"),
+lionel_role_capability_batch\install_lionel_role_capability.py:48:[sys.executable, "-m", "unittest", "tests.test_role_capability", "-v"],
+lionel_role_capability_batch\install_lionel_role_capability.py:55:print("SUCCESS: Role + Capability registry installed and tests passed.")
+lionel_role_capability_batch\agent_registry\roles.py:1:"""Lionel role registry.
+lionel_role_capability_batch\agent_registry\roles.py:3:Roles are declarative metadata used by the runtime for routing and policy.
+lionel_role_capability_batch\agent_registry\roles.py:12:class Role:
+lionel_role_capability_batch\agent_registry\roles.py:23:ROLES: Dict[str, Role] = {
+lionel_role_capability_batch\agent_registry\roles.py:24:"offensive_security": Role(
+lionel_role_capability_batch\agent_registry\roles.py:30:"digital_forensics_soc": Role(
+lionel_role_capability_batch\agent_registry\roles.py:36:"software_ai_architecture": Role(
+lionel_role_capability_batch\agent_registry\roles.py:42:"ui_ux_3d_web": Role(
+lionel_role_capability_batch\agent_registry\roles.py:48:"data_engineering_analytics": Role(
+lionel_role_capability_batch\agent_registry\roles.py:54:"cloud_infrastructure_security": Role(
+lionel_role_capability_batch\agent_registry\roles.py:60:"optical_fiber_network": Role(
+lionel_role_capability_batch\agent_registry\roles.py:66:"growth_business": Role(
+lionel_role_capability_batch\agent_registry\roles.py:72:"content_copywriting": Role(
+lionel_role_capability_batch\agent_registry\roles.py:78:"virtual_assistant": Role(
+lionel_role_capability_batch\agent_registry\roles.py:84:"financial_analysis": Role(
+lionel_role_capability_batch\agent_registry\roles.py:90:"legal_compliance": Role(
+lionel_role_capability_batch\agent_registry\roles.py:96:"security_gRC": Role(
+lionel_role_capability_batch\agent_registry\roles.py:102:"test_automation": Role(
+lionel_role_capability_batch\agent_registry\roles.py:108:"deployment_operations": Role(
+lionel_role_capability_batch\agent_registry\roles.py:114:"malware_reverse_engineering": Role(
+lionel_role_capability_batch\agent_registry\roles.py:120:"threat_intelligence": Role(
+lionel_role_capability_batch\agent_registry\roles.py:126:"malware_defensive_evasion": Role(
+lionel_role_capability_batch\agent_registry\roles.py:132:"enterprise_incident_response": Role(
+lionel_role_capability_batch\agent_registry\roles.py:141:def get_role(role_id: str) -> Role:
+lionel_role_capability_batch\agent_registry\roles.py:142:return ROLES[role_id]
+lionel_role_capability_batch\agent_registry\roles.py:145:def list_roles() -> List[Role]:
+lionel_role_capability_batch\agent_registry\roles.py:146:return list(ROLES.values())
+lionel_role_capability_batch\agent_registry\__init__.py:2:from .roles import ROLES, Role, get_role, list_roles
+lionel_role_capability_batch\agent_registry\__init__.py:6:"ROLES", "Role", "get_role", "list_roles",
+lionel_role_capability_batch\tests\test_role_capability.py:3:from agent_registry.roles import ROLES
+lionel_role_capability_batch\tests\test_role_capability.py:7:class RoleCapabilityTests(unittest.TestCase):
+lionel_role_capability_batch\tests\test_role_capability.py:8:def test_all_19_roles_are_present(self):
+lionel_role_capability_batch\tests\test_role_capability.py:9:self.assertEqual(len(ROLES), 19)
+lionel_role_capability_batch\tests\test_role_capability.py:11:def test_roles_have_required_metadata(self):
+lionel_role_capability_batch\tests\test_role_capability.py:12:for role in ROLES.values():
+lionel_role_capability_batch\tests\test_role_capability.py:13:self.assertTrue(role.id)
+lionel_role_capability_batch\tests\test_role_capability.py:14:self.assertTrue(role.name)
+lionel_role_capability_batch\tests\test_role_capability.py:15:self.assertTrue(role.description)
+lionel_role_capability_batch\tests\test_role_capability.py:16:self.assertTrue(role.skill_categories)
+lionel_role_capability_batch\tests\test_role_capability.py:17:self.assertTrue(role.capability_categories)
+memory\history.py:20:role: str          # "user" | "assistant"
+memory\history.py:30:def add(self, role: str, content: str) -> None:
+memory\history.py:31:self.turns.append(Turn(role=role, content=content))
+memory\history.py:47:parts.append(f"{t.role}: {t.content[:120]}")
+memory\history.py:50:self.turns = [Turn(role="system", content=f"[Earlier: {summary}]")] + recent
+providers\direct.py:216:"role": message.role,
+providers\direct.py:319:if message.role == "system":
+providers\direct.py:329:role = "user" if message.role == "user" else "model"
+providers\direct.py:333:"role": role,
+providers\direct.py:480:"role": message.role,
+providers\direct.py:594:"role": message.role,
+providers\direct.py:674:role="user",
+providers\omniroute.py:47:"messages": [{"role": m.role, "content": m.content} for m in messages],
+providers\omniroute.py:199:messages=[Message(role="user", content="Say OK")],
+providers\types.py:10:role: str
+tests\test_audit_integration.py:30:role="offensive_security",
+tests\test_audit_integration.py:40:role="offensive_security",
+tests\test_audit_integration.py:57:role="test",
+tests\test_audit_ledger.py:21:role="offensive_security",
+tests\test_role_capability.py:3:from agent_registry.roles import ROLES
+tests\test_role_capability.py:7:class RoleCapabilityTests(unittest.TestCase):
+tests\test_role_capability.py:8:def test_all_19_roles_are_present(self):
+tests\test_role_capability.py:9:self.assertEqual(len(ROLES), 19)
+tests\test_role_capability.py:11:def test_roles_have_required_metadata(self):
+tests\test_role_capability.py:12:for role in ROLES.values():
+tests\test_role_capability.py:13:self.assertTrue(role.id)
+tests\test_role_capability.py:14:self.assertTrue(role.name)
+tests\test_role_capability.py:15:self.assertTrue(role.description)
+tests\test_role_capability.py:16:self.assertTrue(role.skill_categories)
+tests\test_role_capability.py:17:self.assertTrue(role.capability_categories)
+tools\executor.py:42:role: Optional[str] = None,
+tools\executor.py:55:role=role,
+tools\executor.py:76:role=role,
+
+--- capability ---
+agent_registry\capabilities.py:1:"""Lionel capability registry.
+agent_registry\capabilities.py:12:class Capability:
+agent_registry\capabilities.py:25:CAPABILITIES: Dict[str, Capability] = {
+agent_registry\capabilities.py:26:"chat": Capability("chat", "General Conversation", "general", "General text interaction.", ["text"]),
+agent_registry\capabilities.py:27:"reasoning": Capability("reasoning", "Reasoning", "general", "Analysis and structured problem solving.", ["text"]),
+agent_registry\capabilities.py:28:"coding": Capability("coding", "Software Development", "software", "Write, inspect, explain, and test code.", ["text", "code"]),
+agent_registry\capabilities.py:29:"web_design": Capability("web_design", "Web Design", "web", "Design and implement web interfaces.", ["text", "image", "code"]),
+agent_registry\capabilities.py:30:"document_processing": Capability("document_processing", "Document Processing", "documents", "Extract, analyze, transform, and summarize documents.", ["document", "text"]),
+agent_registry\capabilities.py:31:"data_analysis": Capability("data_analysis", "Data Analysis", "data", "Analyze structured and unstructured data.", ["text", "document", "structured_data"]),
+agent_registry\capabilities.py:32:"research": Capability("research", "Research", "research", "Gather and synthesize information from permitted sources.", ["text", "document"], True, True, "medium"),
+agent_registry\capabilities.py:33:"reconnaissance": Capability("reconnaissance", "Reconnaissance", "security", "Authorized reconnaissance workflows.", ["text", "structured_data"], True, True, "high"),
+agent_registry\capabilities.py:34:"security_testing": Capability("security_testing", "Security Testing", "security", "Authorized security assessment workflows.", ["text", "structured_data"], True, True, "high"),
+agent_registry\capabilities.py:35:"malware_analysis": Capability("malware_analysis", "Malware Analysis", "security", "Authorized malware analysis and defensive research.", ["text", "document", "structured_data"], True, False, "high"),
+agent_registry\capabilities.py:36:"reverse_engineering": Capability("reverse_engineering", "Reverse Engineering", "security", "Authorized binary and software reverse engineering.", ["text", "code", "document"], True, False, "high"),
+agent_registry\capabilities.py:37:"security_audit": Capability("security_audit", "Security Audit", "security", "Security control and configuration assessment.", ["text", "document", "structured_data"], True, False, "high"),
+agent_registry\capabilities.py:38:"security_operations": Capability("security_operations", "Security Operations", "security", "SOC triage and operational analysis.", ["text", "structured_data"], True, True, "high"),
+agent_registry\capabilities.py:39:"forensics": Capability("forensics", "Digital Forensics", "security", "Evidence-oriented forensic analysis.", ["document", "structured_data"], True, False, "high"),
+agent_registry\capabilities.py:40:"networking": Capability("networking", "Network Diagnostics", "infrastructure", "Network troubleshooting and diagnostics.", ["text", "structured_data"], True, True, "medium"),
+agent_registry\capabilities.py:41:"cloud_operations": Capability("cloud_operations", "Cloud Operations", "infrastructure", "Cloud infrastructure workflows.", ["text", "structured_data"], True, True, "high"),
+agent_registry\capabilities.py:42:"automation": Capability("automation", "Automation", "engineering", "Automate repeatable workflows.", ["text", "code"], True, False, "medium"),
+agent_registry\capabilities.py:43:"testing": Capability("testing", "Testing", "engineering", "Run and interpret controlled tests.", ["text", "code"], True, False, "medium"),
+agent_registry\capabilities.py:44:"deployment": Capability("deployment", "Deployment", "operations", "Controlled application deployment workflows.", ["text", "code"], True, True, "high"),
+agent_registry\capabilities.py:45:"observability": Capability("observability", "Observability", "operations", "Logs, metrics, health checks, and diagnostics.", ["text", "structured_data"], True, True, "medium"),
+agent_registry\capabilities.py:46:"financial_analysis": Capability("financial_analysis", "Financial Analysis", "finance", "Financial calculations and analysis.", ["text", "structured_data", "document"]),
+agent_registry\capabilities.py:47:"content_generation": Capability("content_generation", "Content Generation", "content", "Draft and transform content.", ["text"]),
+agent_registry\capabilities.py:48:"editing": Capability("editing", "Editing", "content", "Review and improve supplied content.", ["text", "document"]),
+agent_registry\capabilities.py:49:"organization": Capability("organization", "Organization", "productivity", "Organize information and tasks.", ["text", "structured_data"]),
+agent_registry\capabilities.py:50:"intelligence": Capability("intelligence", "Threat Intelligence", "security", "Correlate intelligence from permitted sources.", ["text", "structured_data"], True, True, "high"),
+agent_registry\capabilities.py:54:def get_capability(capability_id: str) -> Capability:
+agent_registry\capabilities.py:55:return CAPABILITIES[capability_id]
+agent_registry\capabilities.py:58:def list_capabilities() -> List[Capability]:
+agent_registry\roles.py:17:capability_categories: List[str] = field(default_factory=list)
+agent_registry\__init__.py:3:from .capabilities import CAPABILITIES, Capability, get_capability, list_capabilities
+agent_registry\__init__.py:7:"CAPABILITIES", "Capability", "get_capability", "list_capabilities",
+audit\integration.py:27:capability: Optional[str],
+audit\integration.py:36:capability=capability,
+audit\integration.py:49:capability: Optional[str],
+audit\integration.py:63:capability=capability,
+audit\ledger.py:51:capability: Optional[str] = None
+audit\ledger.py:107:capability TEXT,
+audit\ledger.py:147:role, capability, tool, policy_decision,
+audit\ledger.py:153:data["session_id"], data["role"], data["capability"],
+chains\recon.py:1:"""Governed recon chain: capability context is explicit at every tool boundary."""
+chains\recon.py:49:capability_id="reconnaissance", scope=scope,
+chains\recon.py:65:capability_id="reconnaissance", scope=scope,
+chains\recon.py:83:capability_id="security_testing", scope=scope,
+lionel_audit_integration_batch\audit\integration.py:27:capability: Optional[str],
+lionel_audit_integration_batch\audit\integration.py:36:capability=capability,
+lionel_audit_integration_batch\audit\integration.py:49:capability: Optional[str],
+lionel_audit_integration_batch\audit\integration.py:63:capability=capability,
+lionel_audit_integration_batch\tests\test_audit_integration.py:31:capability="reconnaissance",
+lionel_audit_integration_batch\tests\test_audit_integration.py:41:capability="reconnaissance",
+lionel_audit_integration_batch\tests\test_audit_integration.py:58:capability="test",
+lionel_audit_integration_batch\tests\test_audit_integration.py:79:execute(Tool(), {}, capability="test", execution_mode="simulation")
+lionel_audit_integration_batch\tools\executor.py:37:capability: Optional[str] = None,
+lionel_audit_integration_batch\tools\executor.py:56:capability=capability,
+lionel_audit_integration_batch\tools\executor.py:66:capability=capability,
+lionel_audit_integration_batch\tools\executor.py:77:capability=capability,
+lionel_audit_ledger_batch\audit\ledger.py:51:capability: Optional[str] = None
+lionel_audit_ledger_batch\audit\ledger.py:107:capability TEXT,
+lionel_audit_ledger_batch\audit\ledger.py:147:role, capability, tool, policy_decision,
+lionel_audit_ledger_batch\audit\ledger.py:153:data["session_id"], data["role"], data["capability"],
+lionel_audit_ledger_batch\tests\test_audit_ledger.py:22:capability="reconnaissance",
+lionel_policy_capability_gate_batch\install_lionel_policy_capability_gate.py:26:backup = PROJECT / "backups" / f"capability_gate_{stamp}"
+lionel_policy_capability_gate_batch\install_lionel_policy_capability_gate.py:30:"chains/recon.py", "tests/test_capability_gate.py"):
+lionel_policy_capability_gate_batch\install_lionel_policy_capability_gate.py:43:shutil.copy2(ROOT / "tests/test_capability_gate.py",
+lionel_policy_capability_gate_batch\install_lionel_policy_capability_gate.py:44:PROJECT / "tests/test_capability_gate.py")
+lionel_policy_capability_gate_batch\install_lionel_policy_capability_gate.py:51:PROJECT / "tests/test_capability_gate.py",
+lionel_policy_capability_gate_batch\install_lionel_policy_capability_gate.py:56:[sys.executable, "-m", "unittest", "tests.test_capability_gate", "-v"],
+lionel_policy_capability_gate_batch\install_lionel_policy_capability_gate.py:62:print("SUCCESS: Capability-aware Policy Gateway installed and tests passed.")
+lionel_policy_capability_gate_batch\chains\recon.py:1:"""Governed recon chain: capability context is explicit at every tool boundary."""
+lionel_policy_capability_gate_batch\chains\recon.py:49:capability_id="reconnaissance", scope=scope,
+lionel_policy_capability_gate_batch\chains\recon.py:65:capability_id="reconnaissance", scope=scope,
+lionel_policy_capability_gate_batch\chains\recon.py:83:capability_id="security_testing", scope=scope,
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:8:class CapabilityGateTests(unittest.TestCase):
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:18:def test_correct_capability_allows_simulation(self):
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:22:capability_id="reconnaissance",
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:29:def test_wrong_capability_is_denied(self):
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:33:capability_id="web_design",
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:39:def test_missing_capability_is_denied_for_network_tool(self):
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:46:self.assertIn("capability", result.error.lower())
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:48:def test_real_network_requires_scope_and_correct_capability(self):
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:52:capability_id="reconnaissance",
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:62:capability_id="reconnaissance",
+lionel_policy_capability_gate_batch\tests\test_capability_gate.py:69:self.assertNotIn("capability context is required", (result.error or "").lower())
+lionel_policy_capability_gate_batch\tools\executor.py:13:capability_id: Optional[str] = None,
+lionel_policy_capability_gate_batch\tools\executor.py:21:capability_id=capability_id,
+lionel_policy_capability_gate_batch\tools\policy.py:1:"""Capability-aware Policy Gateway for Lionel.
+lionel_policy_capability_gate_batch\tools\policy.py:5:allowed capability-to-tool mapping.
+lionel_policy_capability_gate_batch\tools\policy.py:51:capability_id: Optional[str] = None,
+lionel_policy_capability_gate_batch\tools\policy.py:56:# Capability -> tool mapping is checked before execution.
+lionel_policy_capability_gate_batch\tools\policy.py:57:if capability_id is None:
+lionel_policy_capability_gate_batch\tools\policy.py:59:return PolicyDecision(False, "Capability context is required for this tool.")
+lionel_policy_capability_gate_batch\tools\policy.py:65:return PolicyDecision(False, "Tool is not registered in the capability registry.")
+lionel_policy_capability_gate_batch\tools\policy.py:68:if capability_id not in spec.capabilities:
+lionel_policy_capability_gate_batch\tools\policy.py:69:return PolicyDecision(False, "Requested capability is not authorized for this tool.")
+lionel_policy_capability_gate_batch\tools\policy.py:77:metadata={"verified": False, "capability": capability_id},
+lionel_policy_capability_gate_batch\tools\policy.py:111:metadata={"principal": scope.principal, "verified": True, "capability": capability_id},
+lionel_policy_capability_gate_batch\tools\registry.py:1:"""Execution registry bridge with capability-aware authorization."""
+lionel_policy_capability_gate_batch\tools\registry.py:45:capability_id: Optional[str] = None,
+lionel_policy_capability_gate_batch\tools\registry.py:57:capability_id=capability_id,
+lionel_role_capability_batch\install_lionel_role_capability.py:16:backup = PROJECT / "backups" / f"role_capability_{stamp}"
+lionel_role_capability_batch\install_lionel_role_capability.py:19:for rel in ("agent_registry", "tests/test_role_capability.py"):
+lionel_role_capability_batch\install_lionel_role_capability.py:29:for rel in ("agent_registry", "tests/test_role_capability.py"):
+lionel_role_capability_batch\install_lionel_role_capability.py:48:[sys.executable, "-m", "unittest", "tests.test_role_capability", "-v"],
+lionel_role_capability_batch\install_lionel_role_capability.py:55:print("SUCCESS: Role + Capability registry installed and tests passed.")
+lionel_role_capability_batch\agent_registry\capabilities.py:1:"""Lionel capability registry.
+lionel_role_capability_batch\agent_registry\capabilities.py:12:class Capability:
+lionel_role_capability_batch\agent_registry\capabilities.py:25:CAPABILITIES: Dict[str, Capability] = {
+lionel_role_capability_batch\agent_registry\capabilities.py:26:"chat": Capability("chat", "General Conversation", "general", "General text interaction.", ["text"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:27:"reasoning": Capability("reasoning", "Reasoning", "general", "Analysis and structured problem solving.", ["text"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:28:"coding": Capability("coding", "Software Development", "software", "Write, inspect, explain, and test code.", ["text", "code"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:29:"web_design": Capability("web_design", "Web Design", "web", "Design and implement web interfaces.", ["text", "image", "code"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:30:"document_processing": Capability("document_processing", "Document Processing", "documents", "Extract, analyze, transform, and summarize documents.", ["document", "text"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:31:"data_analysis": Capability("data_analysis", "Data Analysis", "data", "Analyze structured and unstructured data.", ["text", "document", "structured_data"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:32:"research": Capability("research", "Research", "research", "Gather and synthesize information from permitted sources.", ["text", "document"], True, True, "medium"),
+lionel_role_capability_batch\agent_registry\capabilities.py:33:"reconnaissance": Capability("reconnaissance", "Reconnaissance", "security", "Authorized reconnaissance workflows.", ["text", "structured_data"], True, True, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:34:"security_testing": Capability("security_testing", "Security Testing", "security", "Authorized security assessment workflows.", ["text", "structured_data"], True, True, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:35:"malware_analysis": Capability("malware_analysis", "Malware Analysis", "security", "Authorized malware analysis and defensive research.", ["text", "document", "structured_data"], True, False, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:36:"reverse_engineering": Capability("reverse_engineering", "Reverse Engineering", "security", "Authorized binary and software reverse engineering.", ["text", "code", "document"], True, False, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:37:"security_audit": Capability("security_audit", "Security Audit", "security", "Security control and configuration assessment.", ["text", "document", "structured_data"], True, False, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:38:"security_operations": Capability("security_operations", "Security Operations", "security", "SOC triage and operational analysis.", ["text", "structured_data"], True, True, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:39:"forensics": Capability("forensics", "Digital Forensics", "security", "Evidence-oriented forensic analysis.", ["document", "structured_data"], True, False, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:40:"networking": Capability("networking", "Network Diagnostics", "infrastructure", "Network troubleshooting and diagnostics.", ["text", "structured_data"], True, True, "medium"),
+lionel_role_capability_batch\agent_registry\capabilities.py:41:"cloud_operations": Capability("cloud_operations", "Cloud Operations", "infrastructure", "Cloud infrastructure workflows.", ["text", "structured_data"], True, True, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:42:"automation": Capability("automation", "Automation", "engineering", "Automate repeatable workflows.", ["text", "code"], True, False, "medium"),
+lionel_role_capability_batch\agent_registry\capabilities.py:43:"testing": Capability("testing", "Testing", "engineering", "Run and interpret controlled tests.", ["text", "code"], True, False, "medium"),
+lionel_role_capability_batch\agent_registry\capabilities.py:44:"deployment": Capability("deployment", "Deployment", "operations", "Controlled application deployment workflows.", ["text", "code"], True, True, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:45:"observability": Capability("observability", "Observability", "operations", "Logs, metrics, health checks, and diagnostics.", ["text", "structured_data"], True, True, "medium"),
+lionel_role_capability_batch\agent_registry\capabilities.py:46:"financial_analysis": Capability("financial_analysis", "Financial Analysis", "finance", "Financial calculations and analysis.", ["text", "structured_data", "document"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:47:"content_generation": Capability("content_generation", "Content Generation", "content", "Draft and transform content.", ["text"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:48:"editing": Capability("editing", "Editing", "content", "Review and improve supplied content.", ["text", "document"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:49:"organization": Capability("organization", "Organization", "productivity", "Organize information and tasks.", ["text", "structured_data"]),
+lionel_role_capability_batch\agent_registry\capabilities.py:50:"intelligence": Capability("intelligence", "Threat Intelligence", "security", "Correlate intelligence from permitted sources.", ["text", "structured_data"], True, True, "high"),
+lionel_role_capability_batch\agent_registry\capabilities.py:54:def get_capability(capability_id: str) -> Capability:
+lionel_role_capability_batch\agent_registry\capabilities.py:55:return CAPABILITIES[capability_id]
+lionel_role_capability_batch\agent_registry\capabilities.py:58:def list_capabilities() -> List[Capability]:
+lionel_role_capability_batch\agent_registry\roles.py:17:capability_categories: List[str] = field(default_factory=list)
+lionel_role_capability_batch\agent_registry\__init__.py:3:from .capabilities import CAPABILITIES, Capability, get_capability, list_capabilities
+lionel_role_capability_batch\agent_registry\__init__.py:7:"CAPABILITIES", "Capability", "get_capability", "list_capabilities",
+lionel_role_capability_batch\tests\test_role_capability.py:7:class RoleCapabilityTests(unittest.TestCase):
+lionel_role_capability_batch\tests\test_role_capability.py:17:self.assertTrue(role.capability_categories)
+lionel_role_capability_batch\tests\test_role_capability.py:20:for capability in CAPABILITIES.values():
+lionel_role_capability_batch\tests\test_role_capability.py:21:self.assertTrue(capability.id)
+lionel_role_capability_batch\tests\test_role_capability.py:22:self.assertTrue(capability.name)
+lionel_role_capability_batch\tests\test_role_capability.py:23:self.assertTrue(capability.category)
+lionel_role_capability_batch\tests\test_role_capability.py:24:self.assertTrue(capability.modality)
+lionel_role_capability_batch\tests\test_role_capability.py:27:for capability_id in (
+lionel_role_capability_batch\tests\test_role_capability.py:31:self.assertIn(capability_id, CAPABILITIES)
+lionel_tool_registry_batch\tests\test_tool_registry.py:3:from tools_registry import TOOLS, tools_for_capability
+lionel_tool_registry_batch\tests\test_tool_registry.py:23:def test_capability_resolution_returns_implemented_tools(self):
+lionel_tool_registry_batch\tools_registry\base.py:48:def tools_for_capability(capability_id: str) -> List[ToolSpec]:
+lionel_tool_registry_batch\tools_registry\base.py:49:return [t for t in TOOLS.values() if capability_id in t.capabilities and t.enabled]
+lionel_tool_registry_batch\tools_registry\registry.py:70:# Explicit capability placeholders: visible to the architecture, but not executable.
+lionel_tool_registry_batch\tools_registry\registry.py:71:for tool_id, name, category, capability in (
+lionel_tool_registry_batch\tools_registry\registry.py:82:capabilities=[capability],
+lionel_tool_registry_batch\tools_registry\resolver.py:3:from .base import ToolSpec, tools_for_capability
+lionel_tool_registry_batch\tools_registry\resolver.py:6:def resolve_tools(capability_id: str, *, include_unimplemented: bool = False) -> List[ToolSpec]:
+lionel_tool_registry_batch\tools_registry\resolver.py:7:tools = tools_for_capability(capability_id)
+lionel_tool_registry_batch\tools_registry\resolver.py:12:if capability_id in t.capabilities and t.enabled
+lionel_tool_registry_batch\tools_registry\__init__.py:2:from .base import ToolSpec, TOOLS, get_tool, list_tools, register_tool, tools_for_capability
+lionel_tool_registry_batch\tools_registry\__init__.py:7:"register_tool", "tools_for_capability",
+tests\test_audit_integration.py:31:capability="reconnaissance",
+tests\test_audit_integration.py:41:capability="reconnaissance",
+tests\test_audit_integration.py:58:capability="test",
+tests\test_audit_integration.py:79:execute(Tool(), {}, capability="test", execution_mode="simulation")
+tests\test_audit_ledger.py:22:capability="reconnaissance",
+tests\test_capability_gate.py:8:class CapabilityGateTests(unittest.TestCase):
+tests\test_capability_gate.py:18:def test_correct_capability_allows_simulation(self):
+tests\test_capability_gate.py:22:capability_id="reconnaissance",
+tests\test_capability_gate.py:29:def test_wrong_capability_is_denied(self):
+tests\test_capability_gate.py:33:capability_id="web_design",
+tests\test_capability_gate.py:39:def test_missing_capability_is_denied_for_network_tool(self):
+tests\test_capability_gate.py:46:self.assertIn("capability", result.error.lower())
+tests\test_capability_gate.py:48:def test_real_network_requires_scope_and_correct_capability(self):
+tests\test_capability_gate.py:52:capability_id="reconnaissance",
+tests\test_capability_gate.py:62:capability_id="reconnaissance",
+tests\test_capability_gate.py:69:self.assertNotIn("capability context is required", (result.error or "").lower())
+tests\test_role_capability.py:7:class RoleCapabilityTests(unittest.TestCase):
+tests\test_role_capability.py:17:self.assertTrue(role.capability_categories)
+tests\test_role_capability.py:20:for capability in CAPABILITIES.values():
+tests\test_role_capability.py:21:self.assertTrue(capability.id)
+tests\test_role_capability.py:22:self.assertTrue(capability.name)
+tests\test_role_capability.py:23:self.assertTrue(capability.category)
+tests\test_role_capability.py:24:self.assertTrue(capability.modality)
+tests\test_role_capability.py:27:for capability_id in (
+tests\test_role_capability.py:31:self.assertIn(capability_id, CAPABILITIES)
+tests\test_tool_registry.py:3:from tools_registry import TOOLS, tools_for_capability
+tests\test_tool_registry.py:23:def test_capability_resolution_returns_implemented_tools(self):
+tools\executor.py:37:capability: Optional[str] = None,
+tools\executor.py:56:capability=capability,
+tools\executor.py:66:capability=capability,
+tools\executor.py:77:capability=capability,
+tools\policy.py:1:"""Capability-aware Policy Gateway for Lionel.
+tools\policy.py:5:allowed capability-to-tool mapping.
+tools\policy.py:51:capability_id: Optional[str] = None,
+tools\policy.py:56:# Capability -> tool mapping is checked before execution.
+tools\policy.py:57:if capability_id is None:
+tools\policy.py:59:return PolicyDecision(False, "Capability context is required for this tool.")
+tools\policy.py:65:return PolicyDecision(False, "Tool is not registered in the capability registry.")
+tools\policy.py:68:if capability_id not in spec.capabilities:
+tools\policy.py:69:return PolicyDecision(False, "Requested capability is not authorized for this tool.")
+tools\policy.py:77:metadata={"verified": False, "capability": capability_id},
+tools\policy.py:111:metadata={"principal": scope.principal, "verified": True, "capability": capability_id},
+tools\registry.py:1:"""Execution registry bridge with capability-aware authorization."""
+tools\registry.py:45:capability_id: Optional[str] = None,
+tools\registry.py:57:capability_id=capability_id,
+tools_registry\base.py:48:def tools_for_capability(capability_id: str) -> List[ToolSpec]:
+tools_registry\base.py:49:return [t for t in TOOLS.values() if capability_id in t.capabilities and t.enabled]
+tools_registry\registry.py:70:# Explicit capability placeholders: visible to the architecture, but not executable.
+tools_registry\registry.py:71:for tool_id, name, category, capability in (
+tools_registry\registry.py:82:capabilities=[capability],
+tools_registry\resolver.py:3:from .base import ToolSpec, tools_for_capability
+tools_registry\resolver.py:6:def resolve_tools(capability_id: str, *, include_unimplemented: bool = False) -> List[ToolSpec]:
+tools_registry\resolver.py:7:tools = tools_for_capability(capability_id)
+tools_registry\resolver.py:12:if capability_id in t.capabilities and t.enabled
+tools_registry\__init__.py:2:from .base import ToolSpec, TOOLS, get_tool, list_tools, register_tool, tools_for_capability
+tools_registry\__init__.py:7:"register_tool", "tools_for_capability",

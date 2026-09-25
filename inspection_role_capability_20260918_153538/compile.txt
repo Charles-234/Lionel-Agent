@@ -1,0 +1,1 @@
+﻿=== PYTHON COMPILE CHECK ===

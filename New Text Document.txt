@@ -1,0 +1,92 @@
+"""Lionel web interface. Carries messages to the core, nothing more.
+
+This file is a thin outside door, the same idea as telegram_door.py. It
+never plans, never picks a role, never authorizes, never runs tools, and
+never audits. It only:
+
+1. Shows a chat page in the browser.
+2. Passes the visitor's words into agent.chat.chat().
+3. Shows the reply.
+
+The governance chain stays where it is. Streamlit is just a new door.
+"""
+
+from __future__ import annotations
+
+import os
+import uuid
+
+import streamlit as st
+
+from agent.chat import chat
+
+
+# ---------------------------------------------------------------------------
+# Page setup
+# ---------------------------------------------------------------------------
+st.set_page_config(page_title="Lionel", page_icon="🦁", layout="centered")
+st.title("Lionel")
+
+
+# ---------------------------------------------------------------------------
+# Session identity
+# ---------------------------------------------------------------------------
+# Each browser tab gets its own user_id so memory and history stay separate.
+# Replace this with a real login later. For now, one tab = one anonymous user.
+if "lionel_user_id" not in st.session_state:
+    # Use a small stable integer derived from a random UUID.
+    # chat() expects an int for budget tracking and history lookup.
+    st.session_state.lionel_user_id = abs(hash(uuid.uuid4().hex)) % (10**9)
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+
+# ---------------------------------------------------------------------------
+# Draw existing chat
+# ---------------------------------------------------------------------------
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+
+# ---------------------------------------------------------------------------
+# Handle new input
+# ---------------------------------------------------------------------------
+prompt = st.chat_input("Ask Lionel something...")
+
+if prompt:
+    # Show the user's message immediately.
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Call the core. This is the same function Telegram calls.
+    # No governance logic here. Lionel decides what to do inside chat().
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            try:
+                response = chat(
+                    user_id=st.session_state.lionel_user_id,
+                    user_message=prompt,
+                    include_skills=True,
+                )
+                reply_text = response.text or "(no reply)"
+
+                # Never surface internal errors to the user. Log them if needed.
+                if response.error:
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        "Chat returned error flag: %s", response.error
+                    )
+
+            except Exception as exc:
+                import logging
+                logging.getLogger(__name__).exception("Chat call failed")
+                reply_text = "I could not handle that. Please try again."
+
+        st.markdown(reply_text)
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": reply_text}
+    )

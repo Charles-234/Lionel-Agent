@@ -12,6 +12,11 @@ from audit.ledger import AuditEvent, AuditLedger
 _ERROR_CODE = re.compile(r"\b(POLICY_[A-Z0-9_]+|[A-Z][A-Z0-9_]{2,})\b")
 
 
+def get_audit_ledger() -> AuditLedger:
+    """Return a shared audit ledger instance for dashboard queries."""
+    return AuditLedger()
+
+
 def error_code(value: Any) -> Optional[str]:
     if not value:
         return None
