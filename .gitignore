@@ -45,5 +45,11 @@ Thumbs.db
 .idea/
 *.swp
 
+# Application config (may contain provider credentials / secrets)
+config.json
+
+# Node.js dependencies
+node_modules/
+
 # Allow the template (has no secrets)
 !.env.example
